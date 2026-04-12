@@ -9,8 +9,9 @@
   これにより、チーム名が 1 行でも 2 行でもプレイヤー名の位置は動かない。
 */
 :root {
-  font-family: "Noto Sans JP";
-  font-weight: 700;
+  font-family: "vdl-gigag", "Noto Sans JP";
+  font-style: normal;
+  font-weight: 500;
   color: #ffffff;
   letter-spacing: -0.2em;
 }
@@ -60,14 +61,14 @@
   text-align: left;
   justify-items: left;
   rotate: -15deg;
-  padding-left: 30px;
+  padding-left: 60px;
 }
 
 .side-bravo .side-team-content {
   text-align: right;
   justify-items: right;
   rotate: 15deg;
-  padding-right: 30px;
+  padding-right: 60px;
 }
 
 .side-alias {
@@ -77,11 +78,11 @@
 }
 
 .side-alpha .side-alias {
-  padding-left: 40px;
+  padding-left: 20px;
 }
 
 .side-bravo .side-alias {
-  padding-right: 40px;
+  padding-right: 20px;
 }
 
 .side-team-name {

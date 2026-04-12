@@ -1,8 +1,9 @@
 /* under: 1920x1080 全体のうち、左下 960x70 + 右下 960x70 */
 
 :root {
-  font-family: "Noto Sans JP";
-  font-weight: 700;
+  font-family: "vdl-gigag", "Noto Sans JP";
+  font-style: normal;
+  font-weight: 500;
   color: #ffffff;
   letter-spacing: -0.1em;
   text-shadow: #000000 0 1px 10px, #000000 0 2px 15px;
