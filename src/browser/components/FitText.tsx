@@ -37,7 +37,7 @@ export function FitText({ html, align = 'left', style, ...rest }: Props) {
   const origin = align === 'right' ? 'right top' : 'left top';
 
   return (
-    <div ref={containerRef} style={{ overflow: 'hidden', ...style }} {...rest}>
+    <div ref={containerRef} style={{ ...style }} {...rest}>
       <span
         ref={innerRef}
         style={{
