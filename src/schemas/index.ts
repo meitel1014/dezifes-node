@@ -1,8 +1,14 @@
 export { bundleConfigSchema } from './bundleConfig';
 export type { BundleConfig } from './bundleConfig';
 
-export { alertSchema } from './alert';
-export type { Alert } from './alert';
+export { teamSchema } from './team';
+export type { Team } from './team';
 
-export { stopwatchSchema } from './stopwatch';
-export type { Stopwatch } from './stopwatch';
+export { teamsPoolSchema } from './teamsPool';
+export type { TeamsPool } from './teamsPool';
+
+export { selectionSchema } from './selection';
+export type { Selection } from './selection';
+
+export { visibilitySchema } from './visibility';
+export type { Visibility } from './visibility';

@@ -33,3 +33,4 @@ db
 
 # Temporary files
 .temp
+data/*

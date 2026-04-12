@@ -1,0 +1,72 @@
+/*
+  side: 1920x1080 → 左上 960x960 (alpha) / 右上 960x960 (bravo)
+  会場の映像機器で左右分割して使う想定。
+
+  grid-template-rows でプレイヤー名の位置を固定：
+  - 二つ名: auto（1 行）
+  - チーム名: 最大 2 行分確保（min-content, max 2 行分高さ）
+  - プレイヤー名: 1fr（残り領域に固定配置）
+  これにより、チーム名が 1 行でも 2 行でもプレイヤー名の位置は動かない。
+*/
+.side-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  display: flex;
+  pointer-events: none;
+}
+
+.side-slot {
+  position: absolute;
+  top: 0;
+  width: 960px;
+  height: 960px;
+}
+
+.side-alpha {
+  left: 0;
+}
+
+.side-bravo {
+  right: 0;
+}
+
+.side-team-content {
+  display: grid;
+  grid-template-rows: auto 6em 1fr;
+  height: 100%;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* アルファ左寄せ / ブラボー右寄せ */
+.side-alpha .side-team-content {
+  text-align: left;
+}
+.side-bravo .side-team-content {
+  text-align: right;
+}
+
+/* 二つ名 : チーム名 : プレイヤー名 = 1 : 3 : 2 */
+.side-alias {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.side-team-name {
+  font-size: 48px;
+  line-height: 1.3;
+  align-self: start;
+}
+
+.side-players {
+  font-size: 32px;
+  line-height: 1.6;
+  align-self: start;
+}
+
+.side-player {
+  /* 個別プレイヤー行。CSS 手動調整時のフックとして用意 */
+}

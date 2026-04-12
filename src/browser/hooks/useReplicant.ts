@@ -13,5 +13,6 @@ export const useReplicant = <T extends keyof ReplicantMap>(
       rep.removeListener('change', handleChange);
     };
   }, [rep]);
+  // eslint-disable-next-line react-hooks/immutability -- rep は NodeCG Replicant オブジェクトであり .value への代入が正規の更新 API
   return [value, useCallback((newValue) => (rep.value = newValue), [rep])];
 };

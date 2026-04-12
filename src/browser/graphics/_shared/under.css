@@ -1,0 +1,41 @@
+/* under: 1920x1080 全体のうち、左下 960x70 + 右下 960x70 */
+.under-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  display: flex;
+  pointer-events: none;
+}
+
+.under-slot {
+  position: absolute;
+  bottom: 0;
+  width: 960px;
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.under-alpha {
+  left: 0;
+}
+
+.under-bravo {
+  right: 0;
+}
+
+/* チーム名とプレイヤー名 1:1 比率 */
+.under-team-name {
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.under-players {
+  font-size: 24px;
+  line-height: 1.2;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "nodecg-template-with-vite",
+  "name": "dezifes-nodecg",
   "license": "MIT",
   "private": true,
   "version": "0.0.0",
@@ -15,15 +15,73 @@
     "compatibleRange": "^2.0.0",
     "dashboardPanels": [
       {
-        "name": "example",
-        "title": "example",
-        "file": "example.html",
-        "fullbleed": true
+        "name": "turf-war-team-select",
+        "title": "ナワバリ｜チーム選択",
+        "file": "turf-war-team-select.html",
+        "workspace": "ナワバリ",
+        "width": 4
+      },
+      {
+        "name": "turf-war-buttons",
+        "title": "ナワバリ｜表示操作",
+        "file": "turf-war-buttons.html",
+        "workspace": "ナワバリ",
+        "width": 4
+      },
+      {
+        "name": "turf-war-preview",
+        "title": "ナワバリ｜プレビュー編集",
+        "file": "turf-war-preview.html",
+        "workspace": "ナワバリ",
+        "width": 8
+      },
+      {
+        "name": "splat-zones-team-select",
+        "title": "エリア｜チーム選択",
+        "file": "splat-zones-team-select.html",
+        "workspace": "エリア",
+        "width": 4
+      },
+      {
+        "name": "splat-zones-buttons",
+        "title": "エリア｜表示操作",
+        "file": "splat-zones-buttons.html",
+        "workspace": "エリア",
+        "width": 4
+      },
+      {
+        "name": "splat-zones-preview",
+        "title": "エリア｜プレビュー編集",
+        "file": "splat-zones-preview.html",
+        "workspace": "エリア",
+        "width": 8
+      },
+      {
+        "name": "settings-csv-reload",
+        "title": "設定｜CSV 再読込",
+        "file": "settings-csv-reload.html",
+        "workspace": "設定",
+        "width": 4
       }
     ],
     "graphics": [
       {
-        "file": "example.html",
+        "file": "turf-war-under.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "turf-war-side.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "splat-zones-under.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "splat-zones-side.html",
         "width": 1920,
         "height": 1080
       }
