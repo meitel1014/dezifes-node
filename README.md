@@ -1,90 +1,166 @@
-# NodeCG Template with Vite
+# デジフェス 配信グラフィック（dezifes-nodecg）
 
-NodeCG を用いたライブ配信グラフィックを、React と TypeScript で効率よく構築するための開発用テンプレートです。Vite による高速な開発サイクルと、型安全なデータ同期（Replicant）をすぐに始められるように最適化されています。
+デジ窓フェスティバル（デジフェス）のスプラトゥーン 3 大会用 NodeCG 配信グラフィックシステムです。ナワバリトーナメント・エリアトーナメントのチーム情報を管理・表示します。
 
-## 前提条件
+## 会場 PC セットアップ手順（Windows 11）
 
-- **Node.js**: v22 以上 (LTS推奨)
-- **pnpm**: パッケージマネージャー (Corepackで有効化してください)
-- **Git**
+開発環境が入っていない素の Windows PC で動かすための手順です。
 
-## クイックスタート
+### 1. Node.js のインストール
 
-```bash
-# 依存関係のインストール
+1. https://nodejs.org/ にアクセスし、**v22 LTS**（推奨版）のインストーラーをダウンロード
+2. インストーラーを実行（設定はすべてデフォルトのまま「Next」で OK）
+3. インストール完了後、**PowerShell** を開いて以下を実行し、バージョンが表示されれば成功
+
+```powershell
+node -v
+# v22.x.x と表示されれば OK
+```
+
+### 2. pnpm の有効化
+
+Node.js に同梱されている Corepack で pnpm を有効化します。PowerShell で実行してください。
+
+```powershell
+corepack enable
+```
+
+> **エラーが出る場合**: PowerShell を **管理者として実行** してからもう一度 `corepack enable` を試してください。
+
+### 3. このリポジトリの準備
+
+#### Git がインストール済みの場合
+
+```powershell
+git clone <このリポジトリのURL>
+cd dezifes-nodecg
+```
+
+#### Git がない場合
+
+1. リポジトリの ZIP をダウンロードして展開
+2. PowerShell で展開先のフォルダに移動
+
+```powershell
+cd C:\Users\<ユーザー名>\Downloads\dezifes-nodecg
+```
+
+### 4. 依存関係のインストール
+
+```powershell
 pnpm install
+```
 
-# 開発サーバーの起動 (Vite + NodeCG)
-pnpm dev
+初回は数分かかります。
 
-# ビルドと本番実行
+### 5. ビルド
+
+```powershell
 pnpm build
+```
+
+エラーなく完了すれば準備完了です。
+
+### 6. チーム情報の配置
+
+`data\teams.csv` にチーム情報の CSV ファイルを配置します（UTF-8、BOM なし）。
+
+CSV の列構成：
+
+| 列名 | 内容 |
+|---|---|
+| `どちらのイベントに出場しますか` | `ナワバリトーナメント` または `エリアトーナメント` |
+| `チーム名` | チーム名（改行したい箇所に `<br>` を記述可） |
+| `プレイヤー1`〜`プレイヤー4` | プレイヤー名 |
+| `二つ名` | 二つ名 |
+
+### 7. 起動
+
+```powershell
 npx nodecg start
 ```
 
-## 開発の仕組み
+起動後、ブラウザで以下にアクセスします。
 
-このテンプレートは、`src/` 内のソースコードを Vite でビルドし、NodeCG が認識するバンドル構造（ルートの `dashboard/`, `graphics/`, `extension/`, `schemas/`）を自動生成します。
+| URL | 用途 |
+|---|---|
+| http://localhost:9090 | ダッシュボード（運営操作画面） |
+| http://localhost:9090/bundles/dezifes-nodecg/graphics/turf-war-under.html | ナワバリ Under（配信画面下部） |
+| http://localhost:9090/bundles/dezifes-nodecg/graphics/turf-war-side.html | ナワバリ Side（会場左右分割） |
+| http://localhost:9090/bundles/dezifes-nodecg/graphics/splat-zones-under.html | エリア Under（配信画面下部） |
+| http://localhost:9090/bundles/dezifes-nodecg/graphics/splat-zones-side.html | エリア Side（会場左右分割） |
 
-- **自動HTML生成**: `src/browser/dashboard/foo/index.tsx` を作成すると、ビルド時に `./dashboard/foo.html` が自動生成されます。
-- **型安全な通信**: Zod スキーマと TypeScript の型定義を組み合わせることで、Dashboard / Graphics / Extension 間の通信を完全に補完・チェックできます。
+### 8. OBS への取り込み
 
-## 開発手順ガイド
+1. OBS で「ソース」→「＋」→「ブラウザ」を追加
+2. URL に上記の Graphics URL を入力
+3. 幅 `1920`、高さ `1080` に設定
+4. 「カスタム CSS」は空にする（デフォルトの body 背景色指定を消すため）
 
-新しい機能（例：スコアボード）を追加する標準的なフローは以下の通りです。
+## 運営操作ガイド
 
-### 1. データ構造の定義 (`src/schemas`)
-`Zod` を使用して、同期したいデータ（Replicant）の構造を定義します。
-- `src/schemas/scoreboard.ts` を作成しスキーマを定義。
-- `src/schemas/index.ts` からエクスポート。
+### ダッシュボードの構成
 
-### 2. 型定義の紐付け (`src/nodecg`)
-Replicant や Message の名前に型を紐付けます。これにより、エディタで強力な補完が効くようになります。
-- **Replicant**: `src/nodecg/replicants.d.ts` の `ReplicantMap` に登録。
-- **Message**: `src/nodecg/messages.d.ts` の `MessageMap` に登録。
+ダッシュボードには 3 つのタブ（Workspace）があります。
 
-### 3. フロントエンドの実装 (`src/browser`)
-`src/browser/dashboard/` または `graphics/` 以下にディレクトリを作成します。
-- **Dashboard**: 操作パネルの実装。`useReplicant` フックで値を更新します。
-- **Graphics**: 配信画面（オーバーレイ）の実装。`useReplicant` フックで値を監視し描画します。
-- **CSS**: 各ディレクトリに `.css` を配置し、`index.tsx` で import します。
+- **ナワバリ** — ナワバリトーナメント用の操作パネル
+- **エリア** — エリアトーナメント用の操作パネル
+- **設定** — CSV 再読込
 
-### 4. バックエンドの実装 (`src/extension`)
-ブラウザを閉じても動かしたいロジック（タイマー等）や、機密情報を扱う処理（API連携）を記述します。
-- `src/extension/index.ts` がエントリポイントです。必要に応じてファイルを分割して読み込んでください。
+各トーナメントのタブには以下のパネルがあります。
 
-### 5. マニフェストへの登録 (`package.json`)
-作成した HTML ファイルを NodeCG に認識させるため、`package.json` の `nodecg` セクションにパネルやグラフィックスの設定を追記します。
+| パネル | 操作内容 |
+|---|---|
+| チーム選択 | アルファ / ブラボーのチームをプルダウンで選択 |
+| 表示操作 | チーム情報の表示 / 非表示切り替え、リセット |
+| プレビュー編集 | 選択チームの情報を確認・編集 |
 
-## プロジェクト構成（詳細）
+### 基本的な操作の流れ
 
-```text
-.
-├── bundleName.ts              # バンドル名の定義（URLや型定義に使用）
-├── cfg/                       # NodeCG 設定ファイル (.gitignore対象)
-├── configschema.json          # NodeCG 設定のバリデーションスキーマ
-├── src/                       # 編集対象のソースコード
-│   ├── browser/               # フロントエンド（React）
-│   │   ├── dashboard/         # ダッシュボードパネル (src/browser/dashboard/*/index.tsx)
-│   │   ├── graphics/          # グラフィックス (src/browser/graphics/*/index.tsx)
-│   │   ├── hooks/             # 共用 Hooks (useReplicant等)
-│   │   └── global.css         # リセットCSS・共通の変数定義
-│   ├── extension/             # バックエンド (Node.js/Rollupビルド)
-│   ├── nodecg/                # Replicant / Message の型定義
-│   └── schemas/               # Zod スキーマ定義
-├── vite.config.mts            # Vite 設定
-└── vite-plugin-nodecg.mts     # NodeCG 連携用 Vite プラグイン
+1. **チーム選択パネル** でアルファ・ブラボーのチームを選ぶ
+2. **プレビュー編集パネル** で内容を確認（必要なら編集ボタンで修正）
+3. **表示操作パネル** で「アルファチーム表示」「ブラボーチーム表示」を押す → Graphic にフェードインで表示される
+4. もう一度同じボタンを押すとフェードアウトで非表示になる
+5. **リセットボタン** を押すと、両チーム非表示 + 選択も初期化される
+
+### CSV 再読込
+
+設定タブの「CSV 再読込」ボタンを押すと、`data\teams.csv` から最新のデータを読み直します。**編集した内容はすべて破棄**されるのでご注意ください。
+
+## トラブルシューティング
+
+### `pnpm` コマンドが見つからない
+
+```powershell
+corepack enable
 ```
 
-> [!CAUTION]
-> ルートにある `/dashboard`, `/graphics`, `/extension`, `/shared`, `/schemas` はビルド成果物です。**これらを直接編集しないでください。** 編集は必ず `src/` 内で行います。
+を管理者権限の PowerShell で実行してください。
 
-## 詳細な解説リソース
+### ビルドでエラーが出る
 
-本テンプレートを使用した具体的な実装例（スコアボード、タイマー、外部API連携など）については、以下の Zenn Book で詳しく解説しています。
+Node.js のバージョンが v22 以上であることを確認してください。
 
-- **[NodeCG 配信グラフィック開発入門](https://zenn.dev/bozitoma/books/nodecg-react-overlay)**
+```powershell
+node -v
+```
+
+### 起動後にブラウザでアクセスできない
+
+- `npx nodecg start` が正常に起動しているか確認
+- Windows ファイアウォールのダイアログが出たら「許可」を選択
+- URL が `http://localhost:9090` であることを確認（`https` ではない）
+
+### 同じ LAN 内の別 PC からアクセスしたい
+
+起動 PC の IP アドレスを確認し、`http://<IPアドレス>:9090` でアクセスできます。
+
+```powershell
+ipconfig
+```
+
+で IPv4 アドレスを確認してください（例: `192.168.1.100`）。
 
 ## ライセンス
 
-MIT (詳細は [LICENSE](./LICENSE) を参照)
+MIT（詳細は [LICENSE](./LICENSE) を参照）
