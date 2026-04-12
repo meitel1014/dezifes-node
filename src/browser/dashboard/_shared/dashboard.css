@@ -45,7 +45,6 @@ body {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-  text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
@@ -98,6 +97,14 @@ body {
 
 .btn:active {
   background: #0f172a;
+}
+
+.btn-alpha {
+  border: 1px solid var(--accent-alpha);
+}
+
+.btn-bravo {
+  border: 1px solid var(--accent-bravo);
 }
 
 /* アルファ表示中 */
