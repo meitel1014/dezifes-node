@@ -22,7 +22,7 @@ export function TeamSelectPanel({ mode }: Props) {
 
   return (
     <div className="team-select-panel">
-      <div className="field">
+      <div className="field field-alpha">
         <label>アルファチーム</label>
         <select
           value={slot.alpha ?? ''}
@@ -37,7 +37,7 @@ export function TeamSelectPanel({ mode }: Props) {
         </select>
       </div>
 
-      <div className="field">
+      <div className="field field-bravo">
         <label>ブラボーチーム</label>
         <select
           value={slot.bravo ?? ''}
