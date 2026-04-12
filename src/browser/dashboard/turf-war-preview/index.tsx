@@ -1,4 +1,5 @@
 import '@/browser/global.css';
+import '../_shared/dashboard.css';
 import { createRoot } from 'react-dom/client';
 import { PreviewEditPanel } from '../_shared/PreviewEditPanel';
 

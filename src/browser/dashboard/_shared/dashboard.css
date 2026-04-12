@@ -1,0 +1,290 @@
+/* ============================================================
+   Dashboard 共通スタイル
+   NodeCG の各パネルは iframe 内で独立して描画されるため、
+   ここで定義したスタイルは Dashboard パネルにのみ適用される。
+   ============================================================ */
+
+:root {
+  --bg: #1a1a2e;
+  --bg-surface: #16213e;
+  --bg-input: #0f172a;
+  --border: #2a3a5c;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent-alpha: #f59e0b;
+  --accent-bravo: #3b82f6;
+  --accent-danger: #ef4444;
+  --accent-success: #22c55e;
+  --radius: 6px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+}
+
+/* ── チーム選択パネル ────────────────────── */
+
+.team-select-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.field select:focus {
+  border-color: var(--accent-alpha);
+}
+
+/* ── 表示操作パネル ────────────────────── */
+
+.buttons-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn:hover {
+  background: #1e2d4a;
+}
+
+.btn:active {
+  background: #0f172a;
+}
+
+/* アルファ表示中 */
+.btn-alpha.active {
+  background: color-mix(in srgb, var(--accent-alpha) 20%, transparent);
+  border-color: var(--accent-alpha);
+  color: var(--accent-alpha);
+}
+
+/* ブラボー表示中 */
+.btn-bravo.active {
+  background: color-mix(in srgb, var(--accent-bravo) 20%, transparent);
+  border-color: var(--accent-bravo);
+  color: var(--accent-bravo);
+}
+
+/* リセット */
+.btn-reset {
+  margin-top: 4px;
+  border-color: color-mix(in srgb, var(--accent-danger) 40%, transparent);
+  color: var(--accent-danger);
+  background: transparent;
+}
+
+.btn-reset:hover {
+  background: color-mix(in srgb, var(--accent-danger) 10%, transparent);
+}
+
+/* ── プレビュー編集パネル ──────────────────── */
+
+.preview-edit-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.preview-column h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.preview-alpha h3 {
+  color: var(--accent-alpha);
+  border-bottom-color: color-mix(in srgb, var(--accent-alpha) 40%, transparent);
+}
+
+.preview-bravo h3 {
+  color: var(--accent-bravo);
+  border-bottom-color: color-mix(in srgb, var(--accent-bravo) 40%, transparent);
+}
+
+.preview-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 8px 6px 0;
+  white-space: nowrap;
+  width: 1%;
+  vertical-align: top;
+}
+
+.preview-table td {
+  padding: 4px 0;
+  vertical-align: middle;
+}
+
+.preview-table tr + tr {
+  border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.field-value {
+  display: block;
+  min-height: 1.4em;
+  word-break: break-all;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--accent-alpha);
+  border-radius: 4px;
+  outline: none;
+}
+
+.action-cell {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+  padding-left: 6px;
+}
+
+/* 小ボタン共通 */
+.btn-sm {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-sm:hover {
+  background: #1e2d4a;
+}
+
+.btn-sm + .btn-sm {
+  margin-left: 4px;
+}
+
+.btn-save {
+  border-color: var(--accent-success);
+  color: var(--accent-success);
+}
+
+.btn-cancel {
+  color: var(--text-muted);
+}
+
+.btn-edit {
+  color: var(--text-muted);
+}
+
+.btn-edit:hover {
+  color: var(--text);
+}
+
+/* ── CSV 再読込パネル ──────────────────── */
+
+.csv-reload-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.csv-reload-panel p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.csv-reload-panel code {
+  font-family: "Consolas", "SF Mono", monospace;
+  font-size: 12px;
+  background: var(--bg-input);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--text);
+}
+
+.btn-reload {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-reload:hover {
+  background: #1e2d4a;
+}
+
+.btn-reload:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

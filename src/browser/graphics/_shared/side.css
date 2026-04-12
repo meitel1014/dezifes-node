@@ -8,6 +8,13 @@
   - プレイヤー名: 1fr（残り領域に固定配置）
   これにより、チーム名が 1 行でも 2 行でもプレイヤー名の位置は動かない。
 */
+:root {
+  font-family: "Noto Sans JP";
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2em;
+}
+
 .side-container {
   position: absolute;
   top: 0;
@@ -22,51 +29,76 @@
   position: absolute;
   top: 0;
   width: 960px;
-  height: 960px;
+  height: 1080px;
+  padding-bottom: 300px;
+  overflow: hidden;
 }
 
 .side-alpha {
   left: 0;
+  text-shadow: #555555 -8px 8px 10px, #555555 -12px 12px 15px;
+
 }
 
 .side-bravo {
   right: 0;
+  text-shadow: #555555 8px 8px 10px, #555555 12px 12px 15px;
 }
 
 .side-team-content {
+  white-space: nowrap;
   display: grid;
-  grid-template-rows: auto 6em 1fr;
+  grid-template-rows: 1fr auto auto;
+  align-content: end;
+  width: 100%;
   height: 100%;
-  padding: 40px;
   box-sizing: border-box;
+  overflow: visible;
 }
 
-/* アルファ左寄せ / ブラボー右寄せ */
 .side-alpha .side-team-content {
   text-align: left;
-}
-.side-bravo .side-team-content {
-  text-align: right;
+  justify-items: left;
+  rotate: -15deg;
+  padding-left: 30px;
 }
 
-/* 二つ名 : チーム名 : プレイヤー名 = 1 : 3 : 2 */
+.side-bravo .side-team-content {
+  text-align: right;
+  justify-items: right;
+  rotate: 15deg;
+  padding-right: 30px;
+}
+
 .side-alias {
-  font-size: 16px;
+  font-size: 40px;
   line-height: 1.4;
+  align-self: end;
+}
+
+.side-alpha .side-alias {
+  padding-left: 40px;
+}
+
+.side-bravo .side-alias {
+  padding-right: 40px;
 }
 
 .side-team-name {
-  font-size: 48px;
+  width: 100%;
+  font-size: 100px;
   line-height: 1.3;
-  align-self: start;
+}
+
+.side-alpha .side-team-name {
+  padding-left: 10px;
+}
+
+.side-bravo .side-team-name {
+  padding-right: 10px;
 }
 
 .side-players {
-  font-size: 32px;
-  line-height: 1.6;
-  align-self: start;
-}
-
-.side-player {
-  /* 個別プレイヤー行。CSS 手動調整時のフックとして用意 */
+  font-size: 70px;
+  line-height: 1.4;
 }

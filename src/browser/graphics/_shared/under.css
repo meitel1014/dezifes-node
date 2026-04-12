@@ -1,4 +1,13 @@
 /* under: 1920x1080 全体のうち、左下 960x70 + 右下 960x70 */
+
+:root {
+  font-family: "Noto Sans JP";
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.1em;
+  text-shadow: #000000 0 1px 10px, #000000 0 2px 15px;
+}
+
 .under-container {
   position: absolute;
   bottom: 0;
@@ -31,11 +40,11 @@
 
 /* チーム名とプレイヤー名 1:1 比率 */
 .under-team-name {
-  font-size: 24px;
-  line-height: 1.2;
+  font-size: 30px;
+  line-height: 0.8;
 }
 
 .under-players {
-  font-size: 24px;
-  line-height: 1.2;
+  font-size: 36px;
+  line-height: 1.1;
 }

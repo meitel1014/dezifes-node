@@ -1,4 +1,5 @@
 import { useReplicant } from '../../hooks/useReplicant';
+import { stripHtml } from '../../utils/stripHtml';
 import type { Mode } from '@/nodecg/messages';
 
 type Props = { mode: Mode };
@@ -30,7 +31,7 @@ export function TeamSelectPanel({ mode }: Props) {
           <option value="">-- 選択してください --</option>
           {teams.map((t) => (
             <option key={t.name} value={t.name}>
-              {t.name}
+              {stripHtml(t.name)}
             </option>
           ))}
         </select>
@@ -45,7 +46,7 @@ export function TeamSelectPanel({ mode }: Props) {
           <option value="">-- 選択してください --</option>
           {teams.map((t) => (
             <option key={t.name} value={t.name}>
-              {t.name}
+              {stripHtml(t.name)}
             </option>
           ))}
         </select>

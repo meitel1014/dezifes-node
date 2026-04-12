@@ -1,5 +1,5 @@
-import { Html } from '../../components/Html';
 import { useFadeVisible } from '../../hooks/useFadeVisible';
+import { stripHtml } from '../../utils/stripHtml';
 import { useTeamData } from './useTeamData';
 import type { Mode } from '@/nodecg/messages';
 
@@ -13,7 +13,7 @@ function TeamSlot({ mode, side }: { mode: Mode; side: 'alpha' | 'bravo' }) {
     <div className={`under-slot under-${side}`} style={fadeStyle}>
       {team && (
         <>
-          <Html value={team.name} as="div" className="under-team-name" />
+          <div className="under-team-name">{stripHtml(team.name)}</div>
           <div className="under-players">
             {team.players.join('\u3000')}
           </div>
