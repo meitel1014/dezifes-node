@@ -39,8 +39,8 @@ export function PreviewEditPanel({ mode }: Props) {
   const slot = selection[mode];
   const teams = teamsPool[mode];
 
-  const findTeam = (name: string | null) =>
-    name ? teams.find((t) => t.name === name) ?? null : null;
+  const findTeam = (id: string | null) =>
+    id ? teams.find((t) => t.id === id) ?? null : null;
 
   const alphaTeam = findTeam(slot.alpha);
   const bravoTeam = findTeam(slot.bravo);
@@ -59,7 +59,7 @@ export function PreviewEditPanel({ mode }: Props) {
     const patch = buildPatch(team, editTarget.field, editTarget.value);
     nodecg.sendMessage('updateTeam', {
       mode,
-      teamName: team.name,
+      teamId: team.id,
       patch,
     });
     setEditTarget(null);

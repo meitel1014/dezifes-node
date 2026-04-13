@@ -54,13 +54,13 @@ export default (nodecg: NodeCG) => {
     };
   });
 
-  // チーム情報の部分更新（teamName をキーに同モード内の 1 チームを書き換え）
-  // チーム名自体をリネームした場合、selection 側の参照もカスケード更新する。
-  nodecg.listenFor('updateTeam', ({ mode, teamName, patch }) => {
+  // チーム情報の部分更新（id をキーに同モード内の 1 チームを書き換え）
+  // id は不変なので selection のカスケード更新は不要。
+  nodecg.listenFor('updateTeam', ({ mode, teamId, patch }) => {
     const pool = teamsPoolRep.value;
     if (!pool) return;
     const list = pool[mode];
-    const idx = list.findIndex((t) => t.name === teamName);
+    const idx = list.findIndex((t) => t.id === teamId);
     if (idx < 0) return;
 
     const prev = list[idx];
@@ -78,18 +78,5 @@ export default (nodecg: NodeCG) => {
     const newList = [...list];
     newList[idx] = updated;
     teamsPoolRep.value = { ...pool, [mode]: newList };
-
-    // リネーム時は selection の参照も追従する
-    if (patch.name && patch.name !== prev.name) {
-      const sel = selectionRep.value;
-      if (sel) {
-        const slot = sel[mode];
-        const newSlot = {
-          alpha: slot.alpha === prev.name ? patch.name : slot.alpha,
-          bravo: slot.bravo === prev.name ? patch.name : slot.bravo,
-        };
-        selectionRep.value = { ...sel, [mode]: newSlot };
-      }
-    }
   });
 };

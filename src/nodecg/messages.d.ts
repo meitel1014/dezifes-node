@@ -14,6 +14,6 @@ export type MessageMap = {
   /** 指定モードの α/β 両方を非表示にし、選択も初期化する */
   resetMode: { data: { mode: Mode } };
 
-  /** teamsPool 内の 1 チームをチーム名キーで部分更新する */
-  updateTeam: { data: { mode: Mode; teamName: string; patch: Partial<Team> } };
+  /** teamsPool 内の 1 チームを ID キーで部分更新する */
+  updateTeam: { data: { mode: Mode; teamId: string; patch: Partial<Team> } };
 };

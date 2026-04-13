@@ -13,10 +13,10 @@ export function TeamSelectPanel({ mode }: Props) {
   const teams = teamsPool[mode];
   const slot = selection[mode];
 
-  const handleChange = (side: 'alpha' | 'bravo', teamName: string) => {
+  const handleChange = (side: 'alpha' | 'bravo', teamId: string) => {
     setSelection({
       ...selection,
-      [mode]: { ...slot, [side]: teamName || null },
+      [mode]: { ...slot, [side]: teamId || null },
     });
   };
 
@@ -30,8 +30,8 @@ export function TeamSelectPanel({ mode }: Props) {
         >
           <option value="">-- 選択してください --</option>
           {teams.map((t) => (
-            <option key={t.name} value={t.name}>
-              {stripHtml(t.name)}
+            <option key={t.id} value={t.id}>
+              {stripHtml(t.id)}
             </option>
           ))}
         </select>
@@ -45,8 +45,8 @@ export function TeamSelectPanel({ mode }: Props) {
         >
           <option value="">-- 選択してください --</option>
           {teams.map((t) => (
-            <option key={t.name} value={t.name}>
-              {stripHtml(t.name)}
+            <option key={t.id} value={t.id}>
+              {stripHtml(t.id)}
             </option>
           ))}
         </select>

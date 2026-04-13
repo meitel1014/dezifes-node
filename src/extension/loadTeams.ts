@@ -58,8 +58,14 @@ export function loadTeamsPoolFromCsv(): TeamsPool {
     const modeKey = MODE_LABEL_TO_KEY[modeLabel];
     if (!modeKey) continue;
 
+    const rawName = (row[idx.name] ?? '').trim();
+
+    // チーム名が空の行はスキップ
+    if (rawName === '') continue;
+
     const team: Team = {
-      name: (row[idx.name] ?? '').trim(),
+      id: rawName,
+      name: rawName,
       alias: (row[idx.alias] ?? '').trim(),
       players: [
         (row[idx.player1] ?? '').trim(),
@@ -68,9 +74,6 @@ export function loadTeamsPoolFromCsv(): TeamsPool {
         (row[idx.player4] ?? '').trim(),
       ],
     };
-
-    // チーム名が空の行はスキップ
-    if (team.name === '') continue;
 
     pool[modeKey].push(team);
   }

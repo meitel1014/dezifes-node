@@ -13,9 +13,9 @@ export function useTeamData(mode: Mode, side: Side): {
   const [selection] = useReplicant('selection');
   const [visibility] = useReplicant('visibility');
 
-  const teamName = selection?.[mode]?.[side] ?? null;
-  const team = teamName
-    ? teamsPool?.[mode]?.find((t) => t.name === teamName) ?? null
+  const teamId = selection?.[mode]?.[side] ?? null;
+  const team = teamId
+    ? teamsPool?.[mode]?.find((t) => t.id === teamId) ?? null
     : null;
   const visible = visibility?.[mode]?.[side] ?? false;
 
