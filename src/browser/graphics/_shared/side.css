@@ -14,6 +14,7 @@
   font-weight: 500;
   color: #ffffff;
   letter-spacing: -0.2em;
+  --shadow-color: rgb(136, 136, 136, 0.3 );
 }
 
 .side-container {
@@ -37,20 +38,36 @@
 
 .side-alpha {
   left: 0;
-  text-shadow: #555555 -8px 8px 10px, #555555 -12px 12px 15px;
-
+  text-shadow:
+      2px  2px 5px var(--shadow-color),
+      0px  0px 5px var(--shadow-color),
+     -2px  2px 5px var(--shadow-color),
+     -4px  4px 5px var(--shadow-color),
+     -6px  6px 5px var(--shadow-color),
+     -8px  8px 5px var(--shadow-color),
+    -10px 10px 5px var(--shadow-color),
+    -12px 12px 5px var(--shadow-color),
+    -14px 14px 5px var(--shadow-color);
 }
 
 .side-bravo {
   right: 0;
-  text-shadow: #333333 8px 8px 15px, #333333 12px 12px 15px;
+  text-shadow:
+    -2px  2px 5px var(--shadow-color),
+     0px  0px 5px var(--shadow-color),
+     2px  2px 5px var(--shadow-color),
+     4px  4px 5px var(--shadow-color),
+     6px  6px 5px var(--shadow-color),
+     8px  8px 5px var(--shadow-color),
+    10px 10px 5px var(--shadow-color),
+    12px 12px 5px var(--shadow-color),
+    14px 14px 5px var(--shadow-color);
 }
 
 .side-team-content {
   white-space: nowrap;
   display: grid;
-  grid-template-rows: 1fr auto auto;
-  align-content: end;
+  /* grid-template-rows: auto auto auto; */
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -58,16 +75,22 @@
 
 .side-alpha .side-team-content {
   text-align: left;
-  justify-items: left;
+  justify-items: start;
   rotate: -15deg;
   padding-left: 60px;
 }
 
 .side-bravo .side-team-content {
+  direction: rtl;
   text-align: right;
-  justify-items: right;
+  justify-items: start;
   rotate: 15deg;
   padding-right: 60px;
+  float: right;
+}
+
+.side-bravo .side-team-content > * {
+  direction: ltr;
 }
 
 .side-alias {
@@ -85,9 +108,9 @@
 }
 
 .side-team-name {
-  width: 100%;
+  width: 900px;
   font-size: 100px;
-  line-height: 1.3;
+  line-height: 1.05;
 }
 
 .side-alpha .side-team-name {

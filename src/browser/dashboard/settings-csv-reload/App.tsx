@@ -1,14 +1,20 @@
 import { useState } from 'react';
 
 export function CsvReloadPanel() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
 
   const handleReload = () => {
     setStatus('loading');
-    void nodecg.sendMessage('reloadTeamsCsv').then(() => {
-      setStatus('done');
-      setTimeout(() => setStatus('idle'), 2000);
-    });
+    void nodecg.sendMessage('reloadTeamsCsv').then(
+      () => {
+        setStatus('done');
+        setTimeout(() => setStatus('idle'), 2000);
+      },
+      () => {
+        setStatus('error');
+        setTimeout(() => setStatus('idle'), 3000);
+      },
+    );
   };
 
   return (
@@ -23,7 +29,13 @@ export function CsvReloadPanel() {
         disabled={status === 'loading'}
         className="btn btn-reload"
       >
-        {status === 'loading' ? '読み込み中…' : status === 'done' ? '完了' : 'CSV 再読込'}
+        {status === 'loading'
+          ? '読み込み中…'
+          : status === 'done'
+            ? '完了'
+            : status === 'error'
+              ? '読み込み失敗'
+              : 'CSV 再読込'}
       </button>
     </div>
   );

@@ -11,9 +11,6 @@ export type MessageMap = {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- ts-nodecg の規約：データなしメッセージは {} で表現
   reloadTeamsCsv: {};
 
-  /** 指定モード・サイドのチームを表示する（フェードイン） */
-  showTeam: { data: { mode: Mode; side: Side } };
-
   /** 指定モードの α/β 両方を非表示にし、選択も初期化する */
   resetMode: { data: { mode: Mode } };
 

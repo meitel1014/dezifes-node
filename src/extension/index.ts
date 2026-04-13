@@ -33,18 +33,6 @@ export default (nodecg: NodeCG) => {
     );
   });
 
-  // 指定モード・サイドをフェードインで表示
-  nodecg.listenFor('showTeam', ({ mode, side }) => {
-    const current = visibilityRep.value ?? {
-      turfWar: { alpha: false, bravo: false },
-      splatZones: { alpha: false, bravo: false },
-    };
-    visibilityRep.value = {
-      ...current,
-      [mode]: { ...current[mode], [side]: true },
-    };
-  });
-
   // モード単位のリセット：α/β 両方を非表示化し、選択もクリア
   nodecg.listenFor('resetMode', ({ mode }) => {
     const vis = visibilityRep.value ?? {
@@ -104,4 +92,4 @@ export default (nodecg: NodeCG) => {
       }
     }
   });
-};;
+};
