@@ -25,16 +25,17 @@ export default (nodecg: NodeCG) => {
   }
 
   // CSV 再読込：teamsPool を原本から強制上書き（＝編集内容は破棄）
-  nodecg.listenFor('reloadTeamsCsv', () => {
+  nodecg.listenFor('reloadTeamsCsv', (_data, ack) => {
     const loaded = loadTeamsPoolFromCsv();
     teamsPoolRep.value = loaded;
     log.info(
       `Reloaded teams from CSV: turfWar=${loaded.turfWar.length}, splatZones=${loaded.splatZones.length}`
     );
+    if (ack && !ack.handled) ack(null);
   });
 
   // モード単位のリセット：α/β 両方を非表示化し、選択もクリア
-  nodecg.listenFor('resetMode', ({ mode }) => {
+  nodecg.listenFor('resetMode', ({ mode }, ack) => {
     const vis = visibilityRep.value ?? {
       turfWar: { alpha: false, bravo: false },
       splatZones: { alpha: false, bravo: false },
@@ -52,11 +53,12 @@ export default (nodecg: NodeCG) => {
       ...sel,
       [mode]: { alpha: null, bravo: null },
     };
+    if (ack && !ack.handled) ack(null);
   });
 
   // チーム情報の部分更新（id をキーに同モード内の 1 チームを書き換え）
   // id は不変なので selection のカスケード更新は不要。
-  nodecg.listenFor('updateTeam', ({ mode, teamId, patch }) => {
+  nodecg.listenFor('updateTeam', ({ mode, teamId, patch }, ack) => {
     const pool = teamsPoolRep.value;
     if (!pool) return;
     const list = pool[mode];
@@ -78,5 +80,6 @@ export default (nodecg: NodeCG) => {
     const newList = [...list];
     newList[idx] = updated;
     teamsPoolRep.value = { ...pool, [mode]: newList };
+    if (ack && !ack.handled) ack(null);
   });
 };
