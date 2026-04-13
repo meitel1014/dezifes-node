@@ -22,17 +22,20 @@ export function FitText({ html, align = 'left', style, ...rest }: Props) {
     const inner = innerRef.current;
     if (!container || !inner) return;
 
-    // 一旦スケールをリセットし、次フレームでレイアウト反映後に測定する
+    // 一旦スケール・高さをリセットし、次フレームでレイアウト反映後に測定する
     inner.style.transform = 'none';
+    container.style.height = 'auto';
     const id = requestAnimationFrame(() => {
       const contentWidth = inner.scrollWidth;
       const availableWidth = container.clientWidth;
 
+      let newScale = 1;
       if (contentWidth > availableWidth && contentWidth > 0) {
-        setScale(availableWidth / contentWidth);
-      } else {
-        setScale(1);
+        newScale = availableWidth / contentWidth;
       }
+      setScale(newScale);
+      // コンテナの高さを視覚サイズに合わせる（transform はレイアウトに影響しないため）
+      container.style.height = `${inner.scrollHeight * newScale}px`;
     });
     return () => cancelAnimationFrame(id);
   }, [html]);

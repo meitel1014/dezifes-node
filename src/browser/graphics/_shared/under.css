@@ -5,8 +5,8 @@
   font-style: normal;
   font-weight: 500;
   color: #ffffff;
-  letter-spacing: -0.1em;
-  text-shadow: #000000 0 1px 10px, #000000 0 2px 15px;
+  /* letter-spacing: -0.1em; */
+  /* text-shadow: #000000 0 1px 5px, #000000 0 2px 10px; */
 }
 
 .under-container {
@@ -33,19 +33,21 @@
 
 .under-alpha {
   left: 0;
+  filter: url(#shadow-alpha);
 }
 
 .under-bravo {
   right: 0;
+  filter: url(#shadow-bravo);
 }
 
 /* チーム名とプレイヤー名 1:1 比率 */
 .under-team-name {
-  font-size: 30px;
-  line-height: 0.8;
+  font-size: 26px;
+  line-height: 0.9;
 }
 
 .under-players {
-  font-size: 36px;
-  line-height: 1.1;
+  font-size: 30px;
+  line-height: 1.4;
 }
