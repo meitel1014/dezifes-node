@@ -66,14 +66,6 @@ export function ResultsPanel({ mode }: Props) {
             <br />
             試合開始画面 PNG が格納ディレクトリに保存されると候補がここに現れます。
           </p>
-          <div className="results-current-teams">
-            <span className="tag tag-alpha">
-              α: <Html value={findTeam(slot.alpha)?.name ?? '未選択'} />
-            </span>
-            <span className="tag tag-bravo">
-              β: <Html value={findTeam(slot.bravo)?.name ?? '未選択'} />
-            </span>
-          </div>
         </div>
       )}
 
@@ -148,13 +140,13 @@ function CandidateEditor({
     return (
       <div className={`results-column results-${side}`}>
         <h3>
-          {side === 'alpha' ? 'α' : 'β'} ／{' '}
-          <Html value={team?.name ?? '(未選択)'} />
+          {side === 'alpha' ? 'アルファ' : 'ブラボー'} |{' '}
+          <Html value={team?.id ?? '(未選択)'} />
         </h3>
         <table className="results-table">
           <thead>
             <tr>
-              <th>位置</th>
+              <th></th>
               <th>プレイヤー</th>
               <th>ブキ</th>
             </tr>

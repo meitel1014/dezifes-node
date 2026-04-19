@@ -414,7 +414,7 @@ body {
   vertical-align: middle;
 }
 .results-table select {
-  width: 100%;
+  width: 75%;
   padding: 4px 6px;
   font-size: 12px;
   background: var(--bg-input);
@@ -430,6 +430,7 @@ body {
   font-size: 10px;
   color: var(--text-muted);
   margin-top: 2px;
+  margin-left: 10px;
 }
 .weapon-toggle input {
   margin: 0;
