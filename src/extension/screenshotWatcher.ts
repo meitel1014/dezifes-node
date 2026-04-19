@@ -67,6 +67,7 @@ export function startScreenshotWatcher(opts: StartScreenshotWatcherOptions): voi
           await handleFile(filename);
         } catch (e) {
           log.error(`[screenshotWatcher] failed on ${filename}`, e);
+          processed.delete(filename);
         }
       }
     } finally {

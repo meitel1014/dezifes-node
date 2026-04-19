@@ -13,7 +13,7 @@ export type { Selection } from './selection';
 export { visibilitySchema } from './visibility';
 export type { Visibility } from './visibility';
 
-export { matchSchema, matchesSchema } from './match';
+export { matchesSchema } from './match';
 export type { Match, Matches } from './match';
 
 export { matchCandidatesSchema } from './matchCandidate';

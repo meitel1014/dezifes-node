@@ -37,11 +37,13 @@ export default (nodecg: NodeCG) => {
     );
   }
 
-  // 起動時にブキ対応表を必ずロード（ファイル無ければ空 Record のまま）
-  weaponAliasesRep.value = loadWeaponAliasesFromCsv();
-  log.info(
-    `Loaded weapon aliases: ${Object.keys(weaponAliasesRep.value ?? {}).length} entries`
-  );
+  // 初回起動時のみ CSV からブキ対応表を初期化。永続化された値があればスキップ。
+  if (Object.keys(weaponAliasesRep.value ?? {}).length === 0) {
+    weaponAliasesRep.value = loadWeaponAliasesFromCsv();
+    log.info(
+      `Loaded weapon aliases: ${Object.keys(weaponAliasesRep.value ?? {}).length} entries`
+    );
+  }
 
   // スクショ監視を起動
   const screenshotDir = nodecg.bundleConfig?.screenshotDir ?? 'data/screenshots';
