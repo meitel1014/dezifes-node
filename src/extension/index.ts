@@ -9,6 +9,7 @@ import {
 } from './weaponAliases';
 import { appendMatchCsv } from './appendMatchCsv';
 import { startScreenshotWatcher } from './screenshotWatcher';
+import { loadWeaponTemplates } from './ocr/matchWeapon';
 import type { Match, MatchCandidate, PickCandidate } from '../schemas';
 
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
@@ -54,6 +55,12 @@ export default (nodecg: NodeCG) => {
     visibilityRep,
     matchCandidatesRep,
     log,
+  });
+
+  // NodeCG の HTTP listen 完了後にブキテンプレートを事前ロード。
+  // 初回 OCR 実行時の待ち時間を削減するため。
+  setImmediate(() => {
+    void loadWeaponTemplates().then((t) => log.info(`Weapon templates loaded: ${t.length}`));
   });
 
   // アノテーション済み画像を /annotated-screenshots/{filename} で配信

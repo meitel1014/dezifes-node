@@ -111,9 +111,11 @@ function CandidateEditor({
 
   const handleConfirm = () => {
     void nodecg.sendMessage('confirmMatchCandidate', { mode });
+    setShowAllWeapons({});
   };
   const handleDismiss = () => {
     void nodecg.sendMessage('dismissMatchCandidate', { mode });
+    setShowAllWeapons({});
   };
   const handlePlayerChange = (side: Side, position: PickPosition, playerName: string) => {
     void nodecg.sendMessage('updateMatchCandidate', {
@@ -163,6 +165,12 @@ function CandidateEditor({
                 <tr key={pick.position}>
                   <th>{pick.position + 1}</th>
                   <td>
+                    {pick.nameImageDataUrl && (
+                      <img className="name-region-img" src={pick.nameImageDataUrl} alt="" />
+                    )}
+                    {pick.nameCompareDataUrl && (
+                      <img className="name-region-img" src={pick.nameCompareDataUrl} alt="" />
+                    )}
                     <select
                       value={pick.selected.playerName}
                       onChange={(e) =>
@@ -183,6 +191,9 @@ function CandidateEditor({
                     </select>
                   </td>
                   <td>
+                    {pick.weaponImageDataUrl && (
+                      <img className="name-region-img" src={pick.weaponImageDataUrl} alt="" />
+                    )}
                     <select
                       value={pick.selected.weaponId}
                       onChange={(e) =>

@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import path from 'node:path';
 import { ALPHA_REGIONS, BRAVO_REGIONS, scaleRegion, type SideRegions } from './regions';
 import { annotateScreenshot } from './annotateScreenshot';
-import { matchPlayerName } from './matchPlayerName';
+import { matchPlayerName, rasterizeTextDataUrl } from './matchPlayerName';
 import { matchWeapon } from './matchWeapon';
 import type {
   MatchCandidate,
@@ -57,14 +57,18 @@ export async function processScreenshot(
     width,
     height,
     ALPHA_REGIONS,
-    alphaTeam.players
+    alphaTeam.players,
+    'alpha',
+    log
   );
   const bravoPicks = await ocrSide(
     screenshotPath,
     width,
     height,
     BRAVO_REGIONS,
-    bravoTeam.players
+    bravoTeam.players,
+    'bravo',
+    log
   );
 
   let annotatedFile: string | undefined;
@@ -89,33 +93,83 @@ async function ocrSide(
   width: number,
   height: number,
   regions: SideRegions,
-  playerCandidates: readonly [string, string, string, string]
+  playerCandidates: readonly [string, string, string, string],
+  side: string,
+  log: Logger,
 ): Promise<NonNullable<MatchCandidate>['alpha']['picks']> {
   const positions: PickPosition[] = [0, 1, 2, 3];
 
-  const picks = await Promise.all(
+  // フェーズ1: OCR スコアリング（並列）
+  const raw = await Promise.all(
     positions.map(async (i) => {
       const nameRegion = scaleRegion(regions.names[i], width, height);
       const weaponRegion = scaleRegion(regions.weapons[i], width, height);
-
-      const [rankedNames, rankedWeapons] = await Promise.all([
+      const [rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl] = await Promise.all([
         matchPlayerName(screenshotPath, nameRegion, playerCandidates),
-        matchWeapon(screenshotPath, weaponRegion),
+        matchWeapon(screenshotPath, weaponRegion, width, height),
+        sharp(screenshotPath)
+          .extract({ left: nameRegion.x, top: nameRegion.y, width: nameRegion.w, height: nameRegion.h })
+          .grayscale()
+          .png()
+          .toBuffer()
+          .then((buf) => `data:image/png;base64,${buf.toString('base64')}`),
+        sharp(screenshotPath)
+          .extract({ left: weaponRegion.x, top: weaponRegion.y, width: weaponRegion.w, height: weaponRegion.h })
+          .png()
+          .toBuffer()
+          .then((buf) => `data:image/png;base64,${buf.toString('base64')}`),
       ]);
-
-      const pick: PickCandidate = {
-        position: i,
-        playerCandidates: rankedNames,
-        weaponCandidates: rankedWeapons,
-        selected: {
-          playerName: rankedNames[0] ?? '',
-          weaponId: rankedWeapons[0] ?? '',
-        },
-      };
-      return pick;
+      return { rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl };
     })
   );
+
+  // フェーズ1後: デバッグログ
+  const PLAYER_MAX_MSE = 255 * 255;
+  for (let i = 0; i < positions.length; i++) {
+    const { rankedNames, rankedWeapons } = raw[i];
+    const playerLines = rankedNames
+      .map((s) => `  "${s.name}" → ${Math.max(0, (1 - s.score / PLAYER_MAX_MSE) * 100).toFixed(1)}%`)
+      .join('\n');
+    const weaponLines = rankedWeapons
+      .slice(0, 5)
+      .map((s) => `  "${s.id}" → ${(s.score * 100).toFixed(1)}%`)
+      .join('\n');
+    log.info(`[ocr] ${side} pos=${i}\n[player scores]\n${playerLines}\n[weapon top5]\n${weaponLines}`);
+  }
+
+  // フェーズ2: 重複なし自動選択（逐次）
+  const selectedNames = assignUnique(raw.map((r) => r.rankedNames.map((s) => s.name)));
+
+  // フェーズ3: 比較画像生成（並列）
+  const compareImages = await Promise.all(
+    selectedNames.map((name) =>
+      name ? rasterizeTextDataUrl(name).then((v) => v ?? undefined) : Promise.resolve(undefined)
+    )
+  );
+
+  // フェーズ4: PickCandidate 組み立て
+  const picks = positions.map((i): PickCandidate => ({
+    position: i,
+    playerCandidates: raw[i].rankedNames.map((s) => s.name),
+    weaponCandidates: raw[i].rankedWeapons.map((s) => s.id),
+    selected: {
+      playerName: selectedNames[i],
+      weaponId: raw[i].rankedWeapons[0]?.id ?? '',
+    },
+    nameImageDataUrl: raw[i].nameImageDataUrl,
+    nameCompareDataUrl: compareImages[i],
+    weaponImageDataUrl: raw[i].weaponImageDataUrl,
+  }));
   return [picks[0], picks[1], picks[2], picks[3]];
+}
+
+function assignUnique(rankedLists: string[][]): string[] {
+  const used = new Set<string>();
+  return rankedLists.map((ranked) => {
+    const pick = ranked.find((name) => name !== '' && !used.has(name)) ?? ranked[0] ?? '';
+    if (pick) used.add(pick);
+    return pick;
+  });
 }
 
 // 未使用警告回避用（Side は今後のモード別分岐で使用するかも）

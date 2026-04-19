@@ -4,8 +4,7 @@ import sharp from 'sharp';
 import opentype from 'opentype.js';
 
 const FONT_PATH = path.resolve(process.cwd(), 'data/Splatoon2-merged.ttf');
-const TEXT_HEIGHT = 40; // 候補・領域共通の比較用高さ（px）
-const RENDER_FONT_SIZE = 56; // opentype の getPath に渡す font size（高さはリサイズで揃える）
+const TEXT_HEIGHT = 50; // 候補・領域共通の比較用高さ（px）
 
 let fontCache: opentype.Font | null = null;
 
@@ -28,19 +27,32 @@ function loadFont(): opentype.Font | null {
  * 戻り値は { data, width } 形式の raw バッファ（高さは常に TEXT_HEIGHT）。
  * 幅は文字列の実サイズに依存。
  */
+export async function rasterizeTextDataUrl(text: string): Promise<string | null> {
+  const font = loadFont();
+  if (!font || !text) return null;
+  try {
+    const { data, width } = await rasterizeText(font, text);
+    const buf = await sharp(data, { raw: { width, height: TEXT_HEIGHT, channels: 1 } })
+      .png()
+      .toBuffer();
+    return `data:image/png;base64,${buf.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
 async function rasterizeText(
   font: opentype.Font,
   text: string
 ): Promise<{ data: Buffer; width: number }> {
-  const path2 = font.getPath(text, 0, RENDER_FONT_SIZE, RENDER_FONT_SIZE);
-  const bbox = path2.getBoundingBox();
-  const width = Math.max(1, Math.ceil(bbox.x2 - bbox.x1));
-  const height = Math.max(1, Math.ceil(bbox.y2 - bbox.y1));
+  const fontSize = 35;
+  const baseline = (font.ascender / font.unitsPerEm) * fontSize - 8;
+  const width = Math.max(1, Math.ceil(font.getAdvanceWidth(text, fontSize)));
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${bbox.x1} ${bbox.y1} ${width} ${height}"><rect x="${bbox.x1}" y="${bbox.y1}" width="${width}" height="${height}" fill="black"/><path d="${path2.toPathData(2)}" fill="white"/></svg>`;
+  const glyph = font.getPath(text, 0, baseline, fontSize);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${TEXT_HEIGHT}" viewBox="0 0 ${width} ${TEXT_HEIGHT}"><rect width="${width}" height="${TEXT_HEIGHT}" fill="#161616"/><path d="${glyph.toPathData(2)}" fill="white"/></svg>`;
 
   const { data, info } = await sharp(Buffer.from(svg))
-    .resize({ height: TEXT_HEIGHT })
     .grayscale()
     .removeAlpha()
     .raw()
@@ -113,9 +125,10 @@ export async function matchPlayerName(
   screenshotPath: string,
   region: { x: number; y: number; w: number; h: number },
   candidates: readonly string[]
-): Promise<string[]> {
+): Promise<{ name: string; score: number }[]> {
   const font = loadFont();
-  if (!font || candidates.length === 0) return [...candidates];
+  if (!font || candidates.length === 0)
+    return candidates.map((name) => ({ name, score: Infinity }));
 
   const regionRaster = await rasterizeRegion(screenshotPath, region);
   const scored: { name: string; score: number }[] = [];
@@ -133,5 +146,5 @@ export async function matchPlayerName(
     }
   }
   scored.sort((a, b) => a.score - b.score);
-  return scored.map((s) => s.name);
+  return scored;
 }

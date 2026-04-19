@@ -14,6 +14,9 @@ const pickCandidateSchema = z.object({
     playerName: z.string(),
     weaponId: z.string(),
   }),
+  nameImageDataUrl: z.string().optional(),
+  nameCompareDataUrl: z.string().optional(),
+  weaponImageDataUrl: z.string().optional(),
 });
 
 const sideCandidateSchema = z.object({

@@ -358,6 +358,14 @@ body {
   border-radius: 3px;
 }
 
+.name-region-img {
+  display: block;
+  height: auto;
+  width: auto;
+  margin-bottom: 2px;
+  image-rendering: pixelated;
+}
+
 .results-annotated-img {
   width: 100%;
   border: 1px solid #333;

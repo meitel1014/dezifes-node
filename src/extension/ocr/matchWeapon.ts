@@ -3,86 +3,97 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const WEAPON_IMG_DIR = path.resolve(process.cwd(), 'data/weapon_flat_10_0_0');
-const CANON_SIZE = 48; // テンプレート比較サイズ（小さめで速度優先）
+const CANON_SIZE = 60;
+const N = CANON_SIZE * CANON_SIZE; // ピクセル数（1チャネル）
+
+// ── テンプレートキャッシュ ────────────────────────────
 
 type Template = {
   id: string;
-  /** RGB (3ch) の raw Buffer (CANON_SIZE × CANON_SIZE) */
-  rgb: Buffer;
-  /** アルファマスク (1ch), 0-255。閾値以上のピクセルのみ比較対象に */
-  alpha: Buffer;
+  rgb: Float32Array; // [R,G,B, R,G,B, ...] 正規化済み (0–1)、N*3 要素
+  alpha: Float32Array; // マスク (0–1)、N 要素
 };
 
-let cache: Template[] | null = null;
+let templateCache: Template[] | null = null;
 
-/**
- * ブキ 173 枚を CANON_SIZE 四方の raw バッファとしてキャッシュ。
- * アルファチャネルを保持し、比較時は前景ピクセルのみを使って背景色の影響を抑える。
- */
 export async function loadWeaponTemplates(): Promise<Template[]> {
-  if (cache) return cache;
-  if (!fs.existsSync(WEAPON_IMG_DIR)) return (cache = []);
+  if (templateCache) return templateCache;
+  if (!fs.existsSync(WEAPON_IMG_DIR)) return (templateCache = []);
 
   const files = fs.readdirSync(WEAPON_IMG_DIR).filter((f) => f.toLowerCase().endsWith('.png'));
   const templates: Template[] = [];
   for (const file of files) {
     const id = file.replace(/\.png$/i, '');
-    const full = path.join(WEAPON_IMG_DIR, file);
-    const { data, info } = await sharp(full)
+    const { data, info } = await sharp(path.join(WEAPON_IMG_DIR, file))
       .ensureAlpha()
       .resize(CANON_SIZE, CANON_SIZE, { fit: 'fill' })
       .raw()
       .toBuffer({ resolveWithObject: true });
 
-    // info.channels は 4 (RGBA) のはず
-    const rgb = Buffer.alloc(CANON_SIZE * CANON_SIZE * 3);
-    const alpha = Buffer.alloc(CANON_SIZE * CANON_SIZE);
-    for (let i = 0; i < CANON_SIZE * CANON_SIZE; i++) {
-      rgb[i * 3] = data[i * info.channels];
-      rgb[i * 3 + 1] = data[i * info.channels + 1];
-      rgb[i * 3 + 2] = data[i * info.channels + 2];
-      alpha[i] = info.channels === 4 ? data[i * info.channels + 3] : 255;
+    const rgb = new Float32Array(N * 3);
+    const alpha = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      rgb[i * 3]     = data[i * info.channels]     / 255;
+      rgb[i * 3 + 1] = data[i * info.channels + 1] / 255;
+      rgb[i * 3 + 2] = data[i * info.channels + 2] / 255;
+      alpha[i] = info.channels === 4 ? data[i * info.channels + 3] / 255 : 1;
     }
     templates.push({ id, rgb, alpha });
   }
-  cache = templates;
-  return cache;
+  return (templateCache = templates);
 }
 
-/**
- * スクショの PNG バッファと切り出し領域から、ブキ ID 候補をスコア降順で返す。
- */
+// ── 正規化相互相関（NCC）───────────────────────��─────
+// score = ΣAB·M / √(ΣA²·M × ΣB²·M)  (全チャネル合算)
+function ncc(src: Float32Array, tmpl: Float32Array, mask: Float32Array): number {
+  let sumAB = 0, sumA2 = 0, sumB2 = 0;
+  for (let i = 0; i < N; i++) {
+    const m = mask[i];
+    if (m < 0.5) continue;
+    for (let c = 0; c < 3; c++) {
+      const a = src[i * 3 + c];
+      const b = tmpl[i * 3 + c];
+      sumAB += a * b * m;
+      sumA2 += a * a * m;
+      sumB2 += b * b * m;
+    }
+  }
+  const denom = Math.sqrt(sumA2 * sumB2);
+  return denom === 0 ? 0 : sumAB / denom;
+}
+
+// ── matchWeapon ───────────────────────────────────────
+
 export async function matchWeapon(
   screenshotPath: string,
-  region: { x: number; y: number; w: number; h: number }
-): Promise<string[]> {
+  region: { x: number; y: number; w: number; h: number },
+  imgWidth: number,
+  imgHeight: number,
+): Promise<{ id: string; score: number }[]> {
   const templates = await loadWeaponTemplates();
   if (templates.length === 0) return [];
 
-  const { data: target } = await sharp(screenshotPath)
-    .extract({ left: region.x, top: region.y, width: region.w, height: region.h })
-    .ensureAlpha()
+  // 領域をそのまま CANON_SIZE にリサイズして比較
+  const left   = Math.max(0, region.x);
+  const top    = Math.max(0, region.y);
+  const width  = Math.min(imgWidth  - left, region.w);
+  const height = Math.min(imgHeight - top,  region.h);
+
+  const { data, info } = await sharp(screenshotPath)
+    .extract({ left, top, width, height })
     .resize(CANON_SIZE, CANON_SIZE, { fit: 'fill' })
-    .removeAlpha()
+    .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
 
-  // MSE はアルファの大きいピクセルのみを重みづけして計算
-  const ranked = templates.map((t) => {
-    let sum = 0;
-    let count = 0;
-    for (let i = 0; i < CANON_SIZE * CANON_SIZE; i++) {
-      const a = t.alpha[i];
-      if (a < 32) continue; // ほぼ透明なピクセルはスキップ
-      const dr = target[i * 3] - t.rgb[i * 3];
-      const dg = target[i * 3 + 1] - t.rgb[i * 3 + 1];
-      const db = target[i * 3 + 2] - t.rgb[i * 3 + 2];
-      sum += dr * dr + dg * dg + db * db;
-      count++;
-    }
-    const score = count > 0 ? sum / count : Infinity;
-    return { id: t.id, score };
-  });
-  ranked.sort((a, b) => a.score - b.score);
-  return ranked.map((r) => r.id);
+  const src = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    src[i * 3]     = data[i * info.channels]     / 255;
+    src[i * 3 + 1] = data[i * info.channels + 1] / 255;
+    src[i * 3 + 2] = data[i * info.channels + 2] / 255;
+  }
+
+  const ranked = templates.map((t) => ({ id: t.id, score: ncc(src, t.rgb, t.alpha) }));
+  ranked.sort((a, b) => b.score - a.score);
+  return ranked;
 }
