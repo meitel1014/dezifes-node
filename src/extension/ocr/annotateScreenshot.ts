@@ -5,7 +5,7 @@ import { ALPHA_REGIONS, BRAVO_REGIONS, scaleRegion } from './regions';
 
 const ALPHA_COLOR = '#fefe14';
 const BRAVO_COLOR = '#8870f6';
-const STROKE = 3;
+const STROKE = 1;
 const OUT_W = 960;
 const OUT_H = 540;
 

@@ -19,10 +19,10 @@ export type SideRegions = {
 export const REFERENCE_WIDTH = 1920;
 export const REFERENCE_HEIGHT = 1080;
 
-const ROW_TOP = 180;
-const ROW_STRIDE = 170;
-const ROW_H = 80;
-const WEAPON_SIZE = 110;
+const ROW_TOP = 300;
+const ROW_STRIDE = 121;
+const ROW_H = 50;
+const WEAPON_SIZE = 60;
 
 function rows<T>(make: (i: 0 | 1 | 2 | 3) => T): Picks4<T> {
   return [make(0), make(1), make(2), make(3)];
@@ -30,14 +30,14 @@ function rows<T>(make: (i: 0 | 1 | 2 | 3) => T): Picks4<T> {
 
 export const ALPHA_REGIONS: SideRegions = {
   names: rows((i) => ({
-    x: 140,
+    x: 198,
     y: ROW_TOP + ROW_STRIDE * i,
-    w: 480,
+    w: 270,
     h: ROW_H,
   })),
   weapons: rows((i) => ({
-    x: 640,
-    y: ROW_TOP + ROW_STRIDE * i - 10,
+    x: 198 + 2,
+    y: ROW_TOP + ROW_STRIDE * i + 45,
     w: WEAPON_SIZE,
     h: WEAPON_SIZE,
   })),
@@ -45,14 +45,14 @@ export const ALPHA_REGIONS: SideRegions = {
 
 export const BRAVO_REGIONS: SideRegions = {
   names: rows((i) => ({
-    x: REFERENCE_WIDTH - 140 - 480,
+    x: 1548,
     y: ROW_TOP + ROW_STRIDE * i,
-    w: 480,
+    w: 270,
     h: ROW_H,
   })),
   weapons: rows((i) => ({
-    x: REFERENCE_WIDTH - 640 - WEAPON_SIZE,
-    y: ROW_TOP + ROW_STRIDE * i - 10,
+    x: 1548 + 2,
+    y: ROW_TOP + ROW_STRIDE * i + 45,
     w: WEAPON_SIZE,
     h: WEAPON_SIZE,
   })),
