@@ -110,6 +110,14 @@ function CandidateEditor({
   const bravoTeam = teamsPool[mode].find((t) => t.id === cand.bravo.teamId) ?? null;
 
   const handleConfirm = () => {
+    for (const side of ['alpha', 'bravo'] as const) {
+      const names = cand[side].picks.map((p) => p.selected.playerName).filter(Boolean);
+      const dupes = names.filter((n, i) => names.indexOf(n) !== i);
+      if (dupes.length > 0) {
+        alert(`${side === 'alpha' ? 'アルファ' : 'ブラボー'}に同じプレイヤー名が複数選択されています：${[...new Set(dupes)].join('、')}`);
+        return;
+      }
+    }
     void nodecg.sendMessage('confirmMatchCandidate', { mode });
     setShowAllWeapons({});
   };
@@ -168,9 +176,6 @@ function CandidateEditor({
                     {pick.nameImageDataUrl && (
                       <img className="name-region-img" src={pick.nameImageDataUrl} alt="" />
                     )}
-                    {pick.nameCompareDataUrl && (
-                      <img className="name-region-img" src={pick.nameCompareDataUrl} alt="" />
-                    )}
                     <select
                       value={pick.selected.playerName}
                       onChange={(e) =>
@@ -192,7 +197,7 @@ function CandidateEditor({
                   </td>
                   <td>
                     {pick.weaponImageDataUrl && (
-                      <img className="name-region-img" src={pick.weaponImageDataUrl} alt="" />
+                      <img className="weapon-region-img" src={pick.weaponImageDataUrl} alt="" />
                     )}
                     <select
                       value={pick.selected.weaponId}

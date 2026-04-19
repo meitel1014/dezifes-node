@@ -360,7 +360,15 @@ body {
 
 .name-region-img {
   display: block;
-  height: auto;
+  height: 30px;
+  width: auto;
+  margin-bottom: 2px;
+  image-rendering: pixelated;
+}
+
+.weapon-region-img {
+  display: block;
+  height: 60px;
   width: auto;
   margin-bottom: 2px;
   image-rendering: pixelated;
