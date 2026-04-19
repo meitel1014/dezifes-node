@@ -99,29 +99,34 @@ async function ocrSide(
 ): Promise<NonNullable<MatchCandidate>['alpha']['picks']> {
   const positions: PickPosition[] = [0, 1, 2, 3];
 
-  // フェーズ1: OCR スコアリング（並列）
-  const raw = await Promise.all(
-    positions.map(async (i) => {
-      const nameRegion = scaleRegion(regions.names[i], width, height);
-      const weaponRegion = scaleRegion(regions.weapons[i], width, height);
-      const [rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl] = await Promise.all([
-        matchPlayerName(screenshotPath, nameRegion, playerCandidates),
-        matchWeapon(screenshotPath, weaponRegion, width, height),
-        sharp(screenshotPath)
-          .extract({ left: nameRegion.x, top: nameRegion.y, width: nameRegion.w, height: nameRegion.h })
-          .grayscale()
-          .png()
-          .toBuffer()
-          .then((buf) => `data:image/png;base64,${buf.toString('base64')}`),
-        sharp(screenshotPath)
-          .extract({ left: weaponRegion.x, top: weaponRegion.y, width: weaponRegion.w, height: weaponRegion.h })
-          .png()
-          .toBuffer()
-          .then((buf) => `data:image/png;base64,${buf.toString('base64')}`),
-      ]);
-      return { rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl };
-    })
-  );
+  // フェーズ1: OCR スコアリング（逐次：ポジションごとに処理してイベントループを解放）
+  type RawEntry = {
+    rankedNames: { name: string; score: number }[];
+    rankedWeapons: { id: string; score: number }[];
+    nameImageDataUrl: string;
+    weaponImageDataUrl: string;
+  };
+  const raw: RawEntry[] = [];
+  for (const i of positions) {
+    const nameRegion = scaleRegion(regions.names[i], width, height);
+    const weaponRegion = scaleRegion(regions.weapons[i], width, height);
+    const [rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl] = await Promise.all([
+      matchPlayerName(screenshotPath, nameRegion, playerCandidates),
+      matchWeapon(screenshotPath, weaponRegion, width, height),
+      sharp(screenshotPath)
+        .extract({ left: nameRegion.x, top: nameRegion.y, width: nameRegion.w, height: nameRegion.h })
+        .grayscale()
+        .png()
+        .toBuffer()
+        .then((buf) => `data:image/png;base64,${buf.toString('base64')}`),
+      sharp(screenshotPath)
+        .extract({ left: weaponRegion.x, top: weaponRegion.y, width: weaponRegion.w, height: weaponRegion.h })
+        .png()
+        .toBuffer()
+        .then((buf) => `data:image/png;base64,${buf.toString('base64')}`),
+    ]);
+    raw.push({ rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl });
+  }
 
   // フェーズ1後: デバッグログ
   const PLAYER_MAX_MSE = 255 * 255;
