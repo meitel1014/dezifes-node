@@ -11,6 +11,8 @@ description: NodeCG Replicant・Message の型宣言・Zodスキーマ・Extensi
 3. Dashboard から `sendMessage` で渡す payload の型が MessageMap と一致しているか
 4. `useReplicant` フックの使用箇所で undefined ガードが適切か（`value === undefined` の場合の early return など）
 5. Replicant の初期値と Zod スキーマのデフォルト値が整合しているか
+6. OCR 関連: `src/schemas/matchCandidate.ts` の `PickCandidate` フィールドが `src/extension/ocr/processScreenshot.ts` で生成されるオブジェクトと一致しているか
+7. OCR 関連: `confirmMatchCandidate` / `dismissMatchCandidate` / `updateMatchCandidate` / `deleteMatch` メッセージのハンドラが `src/extension/index.ts` に実装されているか
 
 問題があれば具体的なファイルと行番号を報告してください。
 問題がなければ「整合性OK」と報告してください。
