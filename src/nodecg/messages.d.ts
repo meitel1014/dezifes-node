@@ -2,6 +2,7 @@ import type { Team } from '../schemas';
 
 export type Mode = 'turfWar' | 'splatZones';
 export type Side = 'alpha' | 'bravo';
+export type PickPosition = 0 | 1 | 2 | 3;
 
 /**
  * すべてのメッセージの型を定義するマップ
@@ -16,4 +17,31 @@ export type MessageMap = {
 
   /** teamsPool 内の 1 チームを ID キーで部分更新する */
   updateTeam: { data: { mode: Mode; teamId: string; patch: Partial<Team> } };
+
+  /** 判定結果候補の 1 マスを手動修正（playerName または weaponId を差し替え） */
+  updateMatchCandidate: {
+    data: {
+      mode: Mode;
+      side: Side;
+      position: PickPosition;
+      patch: { playerName?: string; weaponId?: string };
+    };
+  };
+
+  /** 判定結果を確定し matches に追加 + CSV 追記 + candidate を null に戻す */
+  confirmMatchCandidate: { data: { mode: Mode } };
+
+  /** 判定結果候補を破棄（matches に記録せず candidate を null に戻す） */
+  dismissMatchCandidate: { data: { mode: Mode } };
+
+  /** matches から 1 件削除 */
+  deleteMatch: { data: { id: string } };
+
+  /** data/weapon_aliases.csv を再読込して weaponAliases Replicant に反映 */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
+  reloadWeaponAliases: {};
+
+  /** data/weapon_flat_10_0_0/ を走査して data/weapon_aliases.csv のひな型を生成 */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
+  generateWeaponAliasesCsv: {};
 };
