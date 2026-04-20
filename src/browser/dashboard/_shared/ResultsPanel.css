@@ -32,6 +32,40 @@
   margin-top: 4px;
 }
 
+.results-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.results-queue-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  background: var(--bg-surface);
+}
+
+.results-queue-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.results-drop-compact {
+  padding: 8px 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.results-drop-compact--dragging {
+  border-color: var(--accent-alpha);
+  background: color-mix(in srgb, var(--accent-alpha) 8%, transparent);
+}
+
 .results-current-teams {
   display: flex;
   gap: 10px;

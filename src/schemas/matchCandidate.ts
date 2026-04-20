@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 /**
  * OCR 直後・未確定のスクショ判定結果。
- * モード別に最新 1 件のみ保持し、確定 or 破棄で null に戻る。
+ * モード別に最大 10 件のキューとして保持し、確定 or 破棄で個別に削除される。
  * playerCandidates / weaponCandidates はスコア降順で並んだ候補リスト、
  * selected は現在ドロップダウンで選ばれている値。
  */
@@ -29,23 +29,21 @@ const sideCandidateSchema = z.object({
   ]),
 });
 
-const candidateSchema = z
-  .object({
-    sourceFile: z.string(),
-    annotatedFile: z.string().optional(),
-    createdAt: z.string(),
-    alpha: sideCandidateSchema,
-    bravo: sideCandidateSchema,
-  })
-  .nullable();
+const matchCandidateSchema = z.object({
+  sourceFile: z.string(),
+  annotatedFile: z.string().optional(),
+  createdAt: z.string(),
+  alpha: sideCandidateSchema,
+  bravo: sideCandidateSchema,
+});
 
 export const matchCandidatesSchema = z
   .object({
-    turfWar: candidateSchema.default(null),
-    splatZones: candidateSchema.default(null),
+    turfWar: z.array(matchCandidateSchema).default([]),
+    splatZones: z.array(matchCandidateSchema).default([]),
   })
-  .default({ turfWar: null, splatZones: null });
+  .default({ turfWar: [], splatZones: [] });
 
-export type MatchCandidate = z.infer<typeof candidateSchema>;
+export type MatchCandidate = z.infer<typeof matchCandidateSchema>;
 export type MatchCandidates = z.infer<typeof matchCandidatesSchema>;
 export type PickCandidate = z.infer<typeof pickCandidateSchema>;

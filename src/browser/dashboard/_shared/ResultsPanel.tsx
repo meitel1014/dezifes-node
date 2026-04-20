@@ -1,5 +1,5 @@
 import './ResultsPanel.css';
-import { useMemo, useRef, useState } from 'react';
+import { Fragment, useMemo, useRef, useState } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { stripHtml } from '../../utils/stripHtml';
 import { Html } from '../../components/Html';
@@ -46,11 +46,7 @@ export function ResultsPanel({ mode }: Props) {
     return <p>読み込み中…</p>;
   }
 
-  const cand = candidates[mode];
-  const slot = selection[mode];
-
-  const findTeam = (id: string | null | undefined) =>
-    id ? teamsPool[mode].find((t) => t.id === id) ?? null : null;
+  const queue = candidates[mode];
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -96,25 +92,19 @@ export function ResultsPanel({ mode }: Props) {
     }
   };
 
+  const dropZoneProps = {
+    onDragEnter: handleDragEnter,
+    onDragLeave: handleDragLeave,
+    onDragOver: handleDragOver,
+    onDrop: (e: React.DragEvent) => { void handleDrop(e); },
+  };
+
   return (
     <div className="results-panel">
-      {cand ? (
-        <CandidateEditor
-          mode={mode}
-          cand={cand}
-          aliases={aliases}
-          teamsPool={teamsPool}
-          showAllWeapons={showAllWeapons}
-          setShowAllWeapons={setShowAllWeapons}
-          fullWeaponList={fullWeaponList}
-        />
-      ) : (
+      {queue.length === 0 ? (
         <div
           className={`results-empty${isDragging ? ' results-empty--dragging' : ''}`}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={(e) => { void handleDrop(e); }}
+          {...dropZoneProps}
         >
           {isUploading ? (
             <p>OCR 処理中…</p>
@@ -131,6 +121,43 @@ export function ResultsPanel({ mode }: Props) {
               {uploadError && <p className="results-drop-error">{uploadError}</p>}
             </>
           )}
+        </div>
+      ) : (
+        <div className="results-queue">
+          {queue.map((cand, idx) => (
+            <Fragment key={cand.sourceFile + cand.createdAt}>
+              <div className="results-queue-item">
+                <div className="results-queue-badge">
+                  候補 {idx + 1} / {queue.length}
+                </div>
+                <CandidateEditor
+                  mode={mode}
+                  candidateIndex={idx}
+                  cand={cand}
+                  aliases={aliases}
+                  teamsPool={teamsPool}
+                  showAllWeapons={showAllWeapons}
+                  setShowAllWeapons={setShowAllWeapons}
+                  fullWeaponList={fullWeaponList}
+                />
+              </div>
+              {idx === 0 && (
+                <div
+                  className={`results-drop-compact${isDragging ? ' results-drop-compact--dragging' : ''}`}
+                  {...dropZoneProps}
+                >
+                  {isUploading ? (
+                    <span>OCR 処理中…</span>
+                  ) : (
+                    <span className="results-drop-hint">
+                      {isDragging ? 'ここにドロップ' : '次の PNG をここにドロップ'}
+                    </span>
+                  )}
+                  {uploadError && <span className="results-drop-error">{uploadError}</span>}
+                </div>
+              )}
+            </Fragment>
+          ))}
         </div>
       )}
 
@@ -154,6 +181,7 @@ export function ResultsPanel({ mode }: Props) {
 
 type EditorProps = {
   mode: Mode;
+  candidateIndex: number;
   cand: NonNullCandidate;
   aliases: WeaponAliases | undefined;
   teamsPool: TeamsPool;
@@ -164,6 +192,7 @@ type EditorProps = {
 
 function CandidateEditor({
   mode,
+  candidateIndex,
   cand,
   aliases,
   teamsPool,
@@ -183,16 +212,17 @@ function CandidateEditor({
         return;
       }
     }
-    void nodecg.sendMessage('confirmMatchCandidate', { mode });
+    void nodecg.sendMessage('confirmMatchCandidate', { mode, candidateIndex });
     setShowAllWeapons({});
   };
   const handleDismiss = () => {
-    void nodecg.sendMessage('dismissMatchCandidate', { mode });
+    void nodecg.sendMessage('dismissMatchCandidate', { mode, candidateIndex });
     setShowAllWeapons({});
   };
   const handlePlayerChange = (side: Side, position: PickPosition, playerName: string) => {
     void nodecg.sendMessage('updateMatchCandidate', {
       mode,
+      candidateIndex,
       side,
       position,
       patch: { playerName },
@@ -201,6 +231,7 @@ function CandidateEditor({
   const handleWeaponChange = (side: Side, position: PickPosition, weaponId: string) => {
     void nodecg.sendMessage('updateMatchCandidate', {
       mode,
+      candidateIndex,
       side,
       position,
       patch: { weaponId },
@@ -228,7 +259,7 @@ function CandidateEditor({
           </thead>
           <tbody>
             {sideCand.picks.map((pick) => {
-              const key = `${side}-${pick.position}`;
+              const key = `${candidateIndex}-${side}-${pick.position}`;
               const showAll = showAllWeapons[key] ?? false;
               const weaponOptions = showAll && fullWeaponList.length > 0
                 ? fullWeaponList

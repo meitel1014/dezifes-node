@@ -22,17 +22,18 @@ export type MessageMap = {
   updateMatchCandidate: {
     data: {
       mode: Mode;
+      candidateIndex: number;
       side: Side;
       position: PickPosition;
       patch: { playerName?: string; weaponId?: string };
     };
   };
 
-  /** 判定結果を確定し matches に追加 + CSV 追記 + candidate を null に戻す */
-  confirmMatchCandidate: { data: { mode: Mode } };
+  /** 判定結果を確定し matches に追加 + CSV 追記 + キューから指定インデックスのエントリを削除 */
+  confirmMatchCandidate: { data: { mode: Mode; candidateIndex: number } };
 
-  /** 判定結果候補を破棄（matches に記録せず candidate を null に戻す） */
-  dismissMatchCandidate: { data: { mode: Mode } };
+  /** 判定結果候補を破棄（matches に記録せずキューから指定インデックスのエントリを削除） */
+  dismissMatchCandidate: { data: { mode: Mode; candidateIndex: number } };
 
   /** matches から 1 件削除 */
   deleteMatch: { data: { id: string } };
