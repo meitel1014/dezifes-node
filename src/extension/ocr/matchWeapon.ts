@@ -51,8 +51,8 @@ export async function loadWeaponTemplates(warn?: WarnLogger): Promise<Template[]
     }
   }
 
-  // 同ファミリー（_00/_01/_02）のアルファマスクを OR 合成（max）して比較条件を揃える。
-  // _O/_H/_Oct は独立ブキのためファミリー扱いしない。
+  // 同ファミリー（_00/_01/_02/_O）のアルファマスクを OR 合成（max）して比較条件を揃える。
+  // _H/_Oct は独立ブキのためファミリー扱いしない。
   const familyMap = new Map<string, Template[]>();
   for (const t of templates) {
     const m = t.id.match(/^(.+)_(0[012]|O)$/);

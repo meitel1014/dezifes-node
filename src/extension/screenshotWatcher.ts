@@ -133,6 +133,10 @@ export function startScreenshotWatcher(
 
   return {
     markProcessed: (filename) => { processed.add(filename); },
-    stop: () => { watcher.close(); },
+    stop: () => {
+      for (const t of pendingTimers.values()) clearTimeout(t);
+      pendingTimers.clear();
+      watcher.close();
+    },
   };
 }
