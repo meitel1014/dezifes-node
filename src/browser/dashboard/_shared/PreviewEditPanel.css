@@ -1,0 +1,83 @@
+.preview-edit-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.preview-column h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.preview-alpha h3 {
+  color: var(--accent-alpha);
+  border-bottom-color: color-mix(in srgb, var(--accent-alpha) 40%, transparent);
+}
+
+.preview-bravo h3 {
+  color: var(--accent-bravo);
+  border-bottom-color: color-mix(in srgb, var(--accent-bravo) 40%, transparent);
+}
+
+.preview-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 8px 6px 0;
+  white-space: nowrap;
+  width: 1%;
+  vertical-align: top;
+}
+
+.preview-table td {
+  padding: 4px 0;
+  vertical-align: middle;
+}
+
+.preview-table tr + tr {
+  border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.field-value {
+  display: block;
+  min-height: 1.4em;
+  word-break: break-all;
+}
+
+.action-cell {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+  padding-left: 6px;
+}
+
+.btn-save {
+  border-color: var(--accent-success);
+  color: var(--accent-success);
+}
+
+.btn-edit {
+  color: var(--text-muted);
+}
+
+.btn-edit:hover {
+  color: var(--text);
+}
