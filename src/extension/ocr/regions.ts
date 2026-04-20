@@ -22,7 +22,7 @@ export const REFERENCE_HEIGHT = 1080;
 const ROW_TOP = 300;
 const ROW_STRIDE = 121;
 const ROW_H = 50;
-const WEAPON_SIZE = 60;
+const WEAPON_SIZE = 59;
 const WEAPON_X_OFFSET = 3; // ブキアイコンが名前領域より 2px 右にずれている（目視調整）
 const WEAPON_Y_OFFSET = 43;
 

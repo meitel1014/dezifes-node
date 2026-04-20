@@ -3,7 +3,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const WEAPON_IMG_DIR = path.resolve(process.cwd(), 'data/weapon_flat_10_0_0');
-const CANON_SIZE = 60;
+const CANON_SIZE = 59;
 const N = CANON_SIZE * CANON_SIZE; // ピクセル数（1チャネル）
 const ZNCC_BATCH = 15; // 何テンプレートごとに setImmediate で yield するか
 
