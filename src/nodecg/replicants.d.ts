@@ -5,6 +5,7 @@ import type {
   Matches,
   MatchCandidates,
   WeaponAliases,
+  ScreenshotDir,
 } from '../schemas';
 
 /**
@@ -17,4 +18,5 @@ export type ReplicantMap = {
   matches: Matches;
   matchCandidates: MatchCandidates;
   weaponAliases: WeaponAliases;
+  screenshotDir: ScreenshotDir;
 };

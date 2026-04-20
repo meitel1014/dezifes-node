@@ -21,3 +21,6 @@ export type { MatchCandidate, MatchCandidates, PickCandidate } from './matchCand
 
 export { weaponAliasesSchema } from './weaponAliases';
 export type { WeaponAliases } from './weaponAliases';
+
+export { screenshotDirSchema } from './screenshotDir';
+export type { ScreenshotDir } from './screenshotDir';

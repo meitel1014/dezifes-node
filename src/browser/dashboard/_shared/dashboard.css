@@ -321,6 +321,35 @@ body {
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.6;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: default;
+}
+
+.results-empty--dragging {
+  border-color: var(--text);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.results-drop-hint {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 14px;
+  border: 1px dashed var(--text-muted);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.results-empty--dragging .results-drop-hint {
+  border-color: var(--text);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.results-drop-error {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--accent-danger);
 }
 
 .results-current-teams {

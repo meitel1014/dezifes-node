@@ -32,7 +32,9 @@ const DEBOUNCE_MS = 200;
  * 指定ディレクトリの PNG 追加を fs.watch で検知し、両チーム visible なモードに対して
  * OCR 判定を直列キューで実行する。既存ファイルは起動時に processed として扱う。
  */
-export function startScreenshotWatcher(opts: StartScreenshotWatcherOptions): void {
+export function startScreenshotWatcher(
+  opts: StartScreenshotWatcherOptions
+): { markProcessed: (filename: string) => void; stop: () => void } {
   const { screenshotDir, teamsPoolRep, selectionRep, visibilityRep, matchCandidatesRep, log } = opts;
   const absDir = path.resolve(process.cwd(), screenshotDir);
   fs.mkdirSync(absDir, { recursive: true });
@@ -114,7 +116,7 @@ export function startScreenshotWatcher(opts: StartScreenshotWatcherOptions): voi
     }
   };
 
-  fs.watch(absDir, { persistent: true }, (_eventType, filename) => {
+  const watcher = fs.watch(absDir, { persistent: true, recursive: false }, (_eventType, filename) => {
     if (!filename) return;
     if (!filename.toLowerCase().endsWith('.png')) return;
     if (processed.has(filename)) return;
@@ -128,4 +130,9 @@ export function startScreenshotWatcher(opts: StartScreenshotWatcherOptions): voi
     }, DEBOUNCE_MS);
     pendingTimers.set(filename, timer);
   });
+
+  return {
+    markProcessed: (filename) => { processed.add(filename); },
+    stop: () => { watcher.close(); },
+  };
 }
