@@ -83,7 +83,8 @@ export function startScreenshotWatcher(opts: StartScreenshotWatcherOptions): voi
     const selection = selectionRep.value;
     const pool = teamsPoolRep.value;
     if (!visibility || !selection || !pool) {
-      log.warn(`[screenshotWatcher] ${filename}: Replicants not ready, skip`);
+      processed.delete(filename);
+      log.warn(`[screenshotWatcher] ${filename}: Replicants not ready, will retry on next event`);
       return;
     }
 

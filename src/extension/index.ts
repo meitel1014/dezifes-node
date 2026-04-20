@@ -10,7 +10,7 @@ import {
 import { appendMatchCsv } from './appendMatchCsv';
 import { startScreenshotWatcher } from './screenshotWatcher';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
-import type { Match, MatchCandidate, PickCandidate } from '../schemas';
+import type { Match, PickCandidate } from '../schemas';
 
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
 type ConfirmedPicks = Match['alpha']['picks'];
@@ -60,7 +60,13 @@ export default (nodecg: NodeCG) => {
   // NodeCG の HTTP listen 完了後にブキテンプレートを事前ロード。
   // 初回 OCR 実行時の待ち時間を削減するため。
   setImmediate(() => {
-    void loadWeaponTemplates().then((t) => log.info(`Weapon templates loaded: ${t.length}`));
+    void loadWeaponTemplates(log.warn.bind(log)).then((t) => {
+      if (t.length === 0) {
+        log.warn('Weapon templates loaded: 0 (weapon matching will be skipped; check data/weapon_flat_10_0_0/)');
+      } else {
+        log.info(`Weapon templates loaded: ${t.length}`);
+      }
+    });
   });
 
   // アノテーション済み画像を /annotated-screenshots/{filename} で配信
@@ -109,10 +115,17 @@ export default (nodecg: NodeCG) => {
 
   nodecg.listenFor('updateTeam', ({ mode, teamId, patch }, ack) => {
     const pool = teamsPoolRep.value;
-    if (!pool) return;
+    if (!pool) {
+      if (ack && !ack.handled) ack(null);
+      return;
+    }
     const list = pool[mode];
     const idx = list.findIndex((t) => t.id === teamId);
-    if (idx < 0) return;
+    if (idx < 0) {
+      log.warn(`updateTeam: teamId="${teamId}" not found in ${mode}`);
+      if (ack && !ack.handled) ack(null);
+      return;
+    }
 
     const prev = list[idx];
     const updated = { ...prev, ...patch };
@@ -134,9 +147,11 @@ export default (nodecg: NodeCG) => {
   // 判定結果候補の 1 マスを手動修正（playerName/weaponId の差分を反映）
   nodecg.listenFor('updateMatchCandidate', ({ mode, side, position, patch }, ack) => {
     const cands = matchCandidatesRep.value;
-    if (!cands) return;
+    if (!cands || !cands[mode]) {
+      if (ack && !ack.handled) ack(null);
+      return;
+    }
     const cand = cands[mode];
-    if (!cand) return;
 
     const sideData = cand[side];
     const newPicks = replacePick(sideData.picks, position, (p) => ({
@@ -159,9 +174,11 @@ export default (nodecg: NodeCG) => {
 
   nodecg.listenFor('confirmMatchCandidate', ({ mode }, ack) => {
     const cands = matchCandidatesRep.value;
-    if (!cands) return;
+    if (!cands || !cands[mode]) {
+      if (ack && !ack.handled) ack(null);
+      return;
+    }
     const cand = cands[mode];
-    if (!cand) return;
 
     const match: Match = {
       id: crypto.randomUUID(),
@@ -193,7 +210,10 @@ export default (nodecg: NodeCG) => {
 
   nodecg.listenFor('dismissMatchCandidate', ({ mode }, ack) => {
     const cands = matchCandidatesRep.value;
-    if (!cands) return;
+    if (!cands) {
+      if (ack && !ack.handled) ack(null);
+      return;
+    }
     matchCandidatesRep.value = { ...cands, [mode]: null };
     if (ack && !ack.handled) ack(null);
   });
@@ -244,5 +264,3 @@ function toConfirmedPicks(picks: PicksTuple): ConfirmedPicks {
   ];
 }
 
-// 変数未使用を避けつつ、NonNullable<MatchCandidate> を参照として残す
-export type _MatchCandidateRef = NonNullable<MatchCandidate>;

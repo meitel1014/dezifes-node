@@ -12,6 +12,13 @@ import type {
 } from '../../schemas';
 import type { Mode, Side, PickPosition } from '../../nodecg/messages';
 
+type RawEntry = {
+  rankedNames: { name: string; score: number }[];
+  rankedWeapons: { id: string; score: number }[];
+  nameImageDataUrl: string;
+  weaponImageDataUrl: string;
+};
+
 type Logger = {
   info: (message: string, ...args: unknown[]) => void;
   warn: (message: string, ...args: unknown[]) => void;
@@ -94,18 +101,12 @@ async function ocrSide(
   height: number,
   regions: SideRegions,
   playerCandidates: readonly [string, string, string, string],
-  side: string,
+  side: Side,
   log: Logger,
 ): Promise<NonNullable<MatchCandidate>['alpha']['picks']> {
   const positions: PickPosition[] = [0, 1, 2, 3];
 
   // フェーズ1: OCR スコアリング（逐次：ポジションごとに処理してイベントループを解放）
-  type RawEntry = {
-    rankedNames: { name: string; score: number }[];
-    rankedWeapons: { id: string; score: number }[];
-    nameImageDataUrl: string;
-    weaponImageDataUrl: string;
-  };
   const raw: RawEntry[] = [];
   for (const i of positions) {
     const nameRegion = scaleRegion(regions.names[i], width, height);
@@ -177,5 +178,3 @@ function assignUnique(rankedLists: string[][]): string[] {
   });
 }
 
-// 未使用警告回避用（Side は今後のモード別分岐で使用するかも）
-export type _SideRef = Side;

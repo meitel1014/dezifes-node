@@ -20,7 +20,9 @@ type Template = {
 
 let templateCache: Template[] | null = null;
 
-export async function loadWeaponTemplates(): Promise<Template[]> {
+type WarnLogger = (message: string, ...args: unknown[]) => void;
+
+export async function loadWeaponTemplates(warn?: WarnLogger): Promise<Template[]> {
   if (templateCache) return templateCache;
   if (!fs.existsSync(WEAPON_IMG_DIR)) return (templateCache = []);
 
@@ -28,30 +30,34 @@ export async function loadWeaponTemplates(): Promise<Template[]> {
   const templates: Template[] = [];
   for (const file of files) {
     const id = file.replace(/\.png$/i, '');
-    const { data, info } = await sharp(path.join(WEAPON_IMG_DIR, file))
-      .ensureAlpha()
-      .resize(CANON_SIZE, CANON_SIZE, { fit: 'fill' })
-      .raw()
-      .toBuffer({ resolveWithObject: true });
+    try {
+      const { data, info } = await sharp(path.join(WEAPON_IMG_DIR, file))
+        .ensureAlpha()
+        .resize(CANON_SIZE, CANON_SIZE, { fit: 'fill' })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
 
-    const rgb = new Float32Array(N * 3);
-    const alpha = new Float32Array(N);
-    for (let i = 0; i < N; i++) {
-      rgb[i * 3]     = data[i * info.channels]     / 255;
-      rgb[i * 3 + 1] = data[i * info.channels + 1] / 255;
-      rgb[i * 3 + 2] = data[i * info.channels + 2] / 255;
-      alpha[i] = info.channels === 4 ? data[i * info.channels + 3] / 255 : 1;
+      const rgb = new Float32Array(N * 3);
+      const alpha = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        rgb[i * 3]     = data[i * info.channels]     / 255;
+        rgb[i * 3 + 1] = data[i * info.channels + 1] / 255;
+        rgb[i * 3 + 2] = data[i * info.channels + 2] / 255;
+        alpha[i] = info.channels === 4 ? data[i * info.channels + 3] / 255 : 1;
+      }
+      // ZNCC 用：テンプレートの加重平均を事前計算してキャッシュ
+      let wSum = 0, valSum = 0;
+      for (let i = 0; i < N; i++) {
+        const m = alpha[i];
+        if (m < 0.5) continue;
+        for (let c = 0; c < 3; c++) valSum += rgb[i * 3 + c] * m;
+        wSum += m * 3;
+      }
+      const mean = wSum > 0 ? valSum / wSum : 0;
+      templates.push({ id, rgb, alpha, mean });
+    } catch (e) {
+      warn?.(`[matchWeapon] Failed to load template "${file}", skipping`, e);
     }
-    // ZNCC 用：テンプレートの加重平均を事前計算してキャッシュ
-    let wSum = 0, valSum = 0;
-    for (let i = 0; i < N; i++) {
-      const m = alpha[i];
-      if (m < 0.5) continue;
-      for (let c = 0; c < 3; c++) valSum += rgb[i * 3 + c] * m;
-      wSum += m * 3;
-    }
-    const mean = wSum > 0 ? valSum / wSum : 0;
-    templates.push({ id, rgb, alpha, mean });
   }
   return (templateCache = templates);
 }

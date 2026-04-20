@@ -23,6 +23,7 @@ const ROW_TOP = 300;
 const ROW_STRIDE = 121;
 const ROW_H = 50;
 const WEAPON_SIZE = 60;
+const WEAPON_X_OFFSET = 2; // ブキアイコンが名前領域より 2px 右にずれている（目視調整）
 
 function rows<T>(make: (i: 0 | 1 | 2 | 3) => T): Picks4<T> {
   return [make(0), make(1), make(2), make(3)];
@@ -36,7 +37,7 @@ export const ALPHA_REGIONS: SideRegions = {
     h: ROW_H,
   })),
   weapons: rows((i) => ({
-    x: 198 + 2,
+    x: 198 + WEAPON_X_OFFSET,
     y: ROW_TOP + ROW_STRIDE * i + 45,
     w: WEAPON_SIZE,
     h: WEAPON_SIZE,
@@ -51,7 +52,7 @@ export const BRAVO_REGIONS: SideRegions = {
     h: ROW_H,
   })),
   weapons: rows((i) => ({
-    x: 1548 + 2,
+    x: 1548 + WEAPON_X_OFFSET,
     y: ROW_TOP + ROW_STRIDE * i + 45,
     w: WEAPON_SIZE,
     h: WEAPON_SIZE,

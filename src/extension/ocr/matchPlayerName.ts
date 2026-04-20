@@ -5,6 +5,7 @@ import opentype from 'opentype.js';
 
 const FONT_PATH = path.resolve(process.cwd(), 'data/Splatoon2-merged.ttf');
 const TEXT_HEIGHT = 50; // 候補・領域共通の比較用高さ（px）
+const BASELINE_OFFSET = 8; // テキストが SVG 上端に寄りすぎる補正値（目視調整）
 
 let fontCache: opentype.Font | null = null;
 
@@ -46,7 +47,7 @@ async function rasterizeText(
   text: string
 ): Promise<{ data: Buffer; width: number }> {
   const fontSize = 35;
-  const baseline = (font.ascender / font.unitsPerEm) * fontSize - 8;
+  const baseline = (font.ascender / font.unitsPerEm) * fontSize - BASELINE_OFFSET;
   const width = Math.max(1, Math.ceil(font.getAdvanceWidth(text, fontSize)));
 
   const glyph = font.getPath(text, 0, baseline, fontSize);
