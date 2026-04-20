@@ -1,3 +1,4 @@
+import './ButtonsPanel.css';
 import { useReplicant } from '../../hooks/useReplicant';
 import type { Mode } from '@/nodecg/messages';
 

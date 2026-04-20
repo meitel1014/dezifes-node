@@ -1,0 +1,13 @@
+.team-select-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field-alpha select:focus {
+  border-color: var(--accent-alpha);
+}
+
+.field-bravo select:focus {
+  border-color: var(--accent-bravo);
+}

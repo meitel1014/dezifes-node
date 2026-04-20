@@ -1,3 +1,4 @@
+import './ResultsPanel.css';
 import { useMemo, useRef, useState } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { stripHtml } from '../../utils/stripHtml';

@@ -1,3 +1,4 @@
+import './TeamSelectPanel.css';
 import { useReplicant } from '../../hooks/useReplicant';
 import { stripHtml } from '../../utils/stripHtml';
 import type { Mode } from '@/nodecg/messages';
