@@ -6,28 +6,7 @@
 
 開発環境が入っていない素の Windows PC で動かすための手順です。
 
-### 1. Node.js のインストール
-
-1. https://nodejs.org/ にアクセスし、**v22 LTS**（推奨版）のインストーラーをダウンロード
-2. インストーラーを実行（設定はすべてデフォルトのまま「Next」で OK）
-3. インストール完了後、**PowerShell** を開いて以下を実行し、バージョンが表示されれば成功
-
-```powershell
-node -v
-# v22.x.x と表示されれば OK
-```
-
-### 2. pnpm の有効化
-
-Node.js に同梱されている Corepack で pnpm を有効化します。PowerShell で実行してください。
-
-```powershell
-corepack enable
-```
-
-> **エラーが出る場合**: PowerShell を **管理者として実行** してからもう一度 `corepack enable` を試してください。
-
-### 3. このリポジトリの準備
+### 1. このリポジトリの準備
 
 #### Git がインストール済みの場合
 
@@ -45,6 +24,30 @@ cd dezifes-nodecg
 cd C:\Users\<ユーザー名>\Downloads\dezifes-nodecg
 ```
 
+### 2. Node.js のインストール
+
+1. https://nodejs.org/ にアクセスし、**v22 LTS**（推奨版）のインストーラーをダウンロード
+2. インストーラーを実行（設定はすべてデフォルトのまま「Next」で OK）
+3. インストール完了後、**PowerShell** を開いて以下を実行し、バージョンが表示されれば成功
+
+```powershell
+node -v
+# v22.x.x と表示されれば OK
+```
+
+### 3. pnpm の有効化
+
+Node.js に同梱されている Corepack で pnpm を有効化します。PowerShell で実行してください。
+
+```powershell
+corepack enable
+```
+
+> **エラーが出る場合**: PowerShell を **管理者として実行** してからもう一度 `corepack enable` を試してください。
+
+> それでも実行できない場合こちらを参照。
+> https://qiita.com/araiWorks/items/6964e85a73bff3ff705c
+
 ### 4. 依存関係のインストール
 
 ```powershell
@@ -61,18 +64,9 @@ pnpm build
 
 エラーなく完了すれば準備完了です。
 
-### 6. チーム情報の配置
+### 6. 各種ファイルの配置
 
-`data\teams.csv` にチーム情報の CSV ファイルを配置します（UTF-8、BOM なし）。
-
-CSV の列構成：
-
-| 列名 | 内容 |
-|---|---|
-| `どちらのイベントに出場しますか` | `ナワバリトーナメント` または `エリアトーナメント` |
-| `チーム名` | チーム名（改行したい箇所に `<br>` を記述可） |
-| `プレイヤー1`〜`プレイヤー4` | プレイヤー名 |
-| `二つ名` | 二つ名 |
+dataフォルダ内に、Discord上のリンクから落としてきたデータをコピーする。
 
 ### 7. 起動
 
