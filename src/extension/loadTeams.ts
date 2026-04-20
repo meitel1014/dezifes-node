@@ -34,7 +34,13 @@ export function loadTeamsPoolFromCsv(): TeamsPool {
     return { turfWar: [], splatZones: [] };
   }
 
-  const raw = fs.readFileSync(CSV_PATH, 'utf-8');
+  let raw: string;
+  try {
+    raw = fs.readFileSync(CSV_PATH, 'utf-8');
+  } catch (e) {
+    console.error(`[loadTeams] Failed to read ${CSV_PATH}:`, e);
+    return { turfWar: [], splatZones: [] };
+  }
   const rows = parseCsv(raw);
   if (rows.length === 0) {
     return { turfWar: [], splatZones: [] };

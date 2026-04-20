@@ -34,3 +34,5 @@ db
 # Temporary files
 .temp
 data/*
+
+plan*.txt
