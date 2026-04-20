@@ -51,18 +51,21 @@ export async function loadWeaponTemplates(warn?: WarnLogger): Promise<Template[]
     }
   }
 
-  // 同ファミリー（_00/_01/_02/_O）のアルファマスクを OR 合成（max）して比較条件を揃える。
+  // 同ファミリー（_00/_01/_02/_O、スコープ有無）のアルファマスクを OR 合成（max）して比較条件を揃える。
   // _H/_Oct は独立ブキのためファミリー扱いしない。
+  const getFamilyKey = (id: string): string => {
+    const base = id.replace(/Scope$/, '');
+    const m = base.match(/^(.+)_(0[012]|O)$/);
+    return m ? m[1] : base;
+  };
   const familyMap = new Map<string, Template[]>();
   for (const t of templates) {
-    const m = t.id.match(/^(.+)_(0[012]|O)$/);
-    if (m) {
-      const key = m[1];
-      if (!familyMap.has(key)) familyMap.set(key, []);
-      familyMap.get(key)!.push(t);
-    }
+    const key = getFamilyKey(t.id);
+    if (!familyMap.has(key)) familyMap.set(key, []);
+    familyMap.get(key)!.push(t);
   }
   for (const members of familyMap.values()) {
+    if (members.length < 2) continue;
     const unionAlpha = new Float32Array(N);
     for (const t of members) {
       for (let i = 0; i < N; i++) {
