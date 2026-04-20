@@ -39,7 +39,7 @@ export const ALPHA_REGIONS: SideRegions = {
   })),
   weapons: rows((i) => ({
     x: 198 + WEAPON_X_OFFSET,
-    y: ROW_TOP + ROW_STRIDE * i + 45,
+    y: ROW_TOP + ROW_STRIDE * i + WEAPON_Y_OFFSET,
     w: WEAPON_SIZE,
     h: WEAPON_SIZE,
   })),
@@ -54,7 +54,7 @@ export const BRAVO_REGIONS: SideRegions = {
   })),
   weapons: rows((i) => ({
     x: 1548 + WEAPON_X_OFFSET,
-    y: ROW_TOP + ROW_STRIDE * i + 45,
+    y: ROW_TOP + ROW_STRIDE * i + WEAPON_Y_OFFSET,
     w: WEAPON_SIZE,
     h: WEAPON_SIZE,
   })),

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { stripHtml } from '../../utils/stripHtml';
 import { Html } from '../../components/Html';
@@ -27,6 +27,10 @@ export function ResultsPanel({ mode }: Props) {
   const [aliases] = useReplicant('weaponAliases');
   const [selection] = useReplicant('selection');
   const [showAllWeapons, setShowAllWeapons] = useState<Record<string, boolean>>({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const dragCountRef = useRef(0);
 
   const recentMatches = useMemo(
     () => [...(matches ?? [])].reverse().slice(0, 5),
@@ -47,6 +51,50 @@ export function ResultsPanel({ mode }: Props) {
   const findTeam = (id: string | null | undefined) =>
     id ? teamsPool[mode].find((t) => t.id === id) ?? null : null;
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCountRef.current++;
+    setIsDragging(true);
+  };
+  const handleDragLeave = () => {
+    dragCountRef.current--;
+    if (dragCountRef.current === 0) setIsDragging(false);
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCountRef.current = 0;
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.png') && !file.type.startsWith('image/')) {
+      setUploadError('PNG ファイルをドロップしてください');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const res = await fetch(`/upload-screenshot?mode=${mode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'image/png' },
+        body: file,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        setUploadError(data.error ?? `エラー (HTTP ${res.status})`);
+      }
+    } catch {
+      setUploadError('アップロード失敗');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="results-panel">
       {cand ? (
@@ -60,12 +108,28 @@ export function ResultsPanel({ mode }: Props) {
           fullWeaponList={fullWeaponList}
         />
       ) : (
-        <div className="results-empty">
-          <p>
-            判定待機中… 両チームを表示状態にした上で、
-            <br />
-            試合開始画面 PNG が格納ディレクトリに保存されると候補がここに現れます。
-          </p>
+        <div
+          className={`results-empty${isDragging ? ' results-empty--dragging' : ''}`}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={(e) => { void handleDrop(e); }}
+        >
+          {isUploading ? (
+            <p>OCR 処理中…</p>
+          ) : (
+            <>
+              <p>
+                判定待機中… 両チームを表示状態にした上で、
+                <br />
+                試合開始画面 PNG が格納ディレクトリに保存されると候補がここに現れます。
+              </p>
+              <p className="results-drop-hint">
+                {isDragging ? 'ここにドロップ' : 'または PNG をここにドロップ'}
+              </p>
+              {uploadError && <p className="results-drop-error">{uploadError}</p>}
+            </>
+          )}
         </div>
       )}
 

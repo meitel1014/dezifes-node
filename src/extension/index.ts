@@ -10,7 +10,10 @@ import {
 import { appendMatchCsv } from './appendMatchCsv';
 import { startScreenshotWatcher } from './screenshotWatcher';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
+import { processScreenshot } from './ocr/processScreenshot';
 import type { Match, PickCandidate } from '../schemas';
+import type { Mode } from '../nodecg/messages';
+
 
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
 type ConfirmedPicks = Match['alpha']['picks'];
@@ -25,6 +28,7 @@ export default (nodecg: NodeCG) => {
   const matchesRep = nodecg.Replicant('matches');
   const matchCandidatesRep = nodecg.Replicant('matchCandidates');
   const weaponAliasesRep = nodecg.Replicant('weaponAliases');
+  const screenshotDirRep = nodecg.Replicant('screenshotDir');
 
   // 初回起動時のみ CSV から teamsPool を初期化。
   const isEmptyPool = (pool: typeof teamsPoolRep.value) =>
@@ -46,15 +50,30 @@ export default (nodecg: NodeCG) => {
     );
   }
 
-  // スクショ監視を起動
-  const screenshotDir = nodecg.bundleConfig?.screenshotDir ?? 'data/screenshots';
-  startScreenshotWatcher({
-    screenshotDir,
+  const getScreenshotAbsDir = () =>
+    path.resolve(process.cwd(), screenshotDirRep.value ?? 'data/screenshots');
+
+  // スクショ監視を起動（ディレクトリ変更時は再起動）
+  let watcherHandle = startScreenshotWatcher({
+    screenshotDir: screenshotDirRep.value ?? 'data/screenshots',
     teamsPoolRep,
     selectionRep,
     visibilityRep,
     matchCandidatesRep,
     log,
+  });
+
+  screenshotDirRep.on('change', (newDir) => {
+    watcherHandle.stop();
+    watcherHandle = startScreenshotWatcher({
+      screenshotDir: newDir ?? 'data/screenshots',
+      teamsPoolRep,
+      selectionRep,
+      visibilityRep,
+      matchCandidatesRep,
+      log,
+    });
+    log.info(`Screenshot watcher restarted: ${newDir ?? 'data/screenshots'}`);
   });
 
   // NodeCG の HTTP listen 完了後にブキテンプレートを事前ロード。
@@ -70,15 +89,80 @@ export default (nodecg: NodeCG) => {
   });
 
   // アノテーション済み画像を /annotated-screenshots/{filename} で配信
-  const annotatedDir = path.resolve(process.cwd(), screenshotDir, 'annotated');
   nodecg.mount('/annotated-screenshots', (req, res) => {
     const filename = path.basename(decodeURIComponent(req.path));
-    const filePath = path.join(annotatedDir, filename);
+    const filePath = path.join(getScreenshotAbsDir(), 'annotated', filename);
     if (fs.existsSync(filePath)) {
       res.sendFile(filePath);
     } else {
       res.status(404).end();
     }
+  });
+
+  // ダッシュボードから PNG をドロップして OCR を手動起動するためのアップロードエンドポイント
+  // POST /upload-screenshot?mode=turfWar  (body: raw PNG binary)
+  nodecg.mount('/upload-screenshot', (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).end();
+      return;
+    }
+
+    const modeParam = req.query['mode'];
+    const mode: Mode | null =
+      modeParam === 'turfWar' || modeParam === 'splatZones' ? modeParam : null;
+    if (!mode) {
+      res.status(400).json({ error: 'invalid mode' });
+      return;
+    }
+
+    const selection = selectionRep.value;
+    const pool = teamsPoolRep.value;
+    if (!selection || !pool) {
+      res.status(503).json({ error: 'replicants not ready' });
+      return;
+    }
+
+    // watcher が同ファイルを二重処理しないよう先にマーク
+    const filename = `manual-${Date.now()}.png`;
+    watcherHandle.markProcessed(filename);
+
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => chunks.push(chunk));
+    req.on('end', () => {
+      const absDir = getScreenshotAbsDir();
+      try {
+        fs.writeFileSync(path.join(absDir, filename), Buffer.concat(chunks));
+      } catch (e) {
+        log.error('[upload] ファイル保存失敗', e);
+        res.status(500).json({ error: 'write failed' });
+        return;
+      }
+
+      // 202 をすぐ返し、OCR は非同期で実行
+      res.status(202).json({ filename });
+
+      log.info(`[upload] OCR start: ${filename} (mode=${mode})`);
+      void processScreenshot({
+        screenshotPath: path.join(absDir, filename),
+        sourceFile: filename,
+        mode,
+        selection,
+        teamsPool: pool,
+        log,
+      }).then((cand) => {
+        if (!cand) {
+          log.warn(`[upload] OCR skipped: ${filename} — α/β チームが選択されていません`);
+          return;
+        }
+        const cur = matchCandidatesRep.value ?? { turfWar: null, splatZones: null };
+        matchCandidatesRep.value = { ...cur, [mode]: cand };
+        log.info(`[upload] OCR done: ${filename} (mode=${mode})`);
+      }).catch((e) => log.error(`[upload] OCR 失敗: ${filename}`, e));
+    });
+
+    req.on('error', (e) => {
+      log.error('[upload] リクエストエラー', e);
+    });
   });
 
   // ── Message ハンドラ ───────────────────────────────────
@@ -240,6 +324,7 @@ export default (nodecg: NodeCG) => {
     weaponAliasesRep.value = loadWeaponAliasesFromCsv();
     if (ack && !ack.handled) ack(null);
   });
+
 };
 
 function replacePick(
@@ -263,4 +348,5 @@ function toConfirmedPicks(picks: PicksTuple): ConfirmedPicks {
     { ...picks[3].selected },
   ];
 }
+
 

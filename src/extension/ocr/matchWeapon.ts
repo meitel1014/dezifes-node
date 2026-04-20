@@ -13,9 +13,9 @@ const yieldToEventLoop = (): Promise<void> => new Promise((r) => setImmediate(r)
 
 type Template = {
   id: string;
-  rgb: Float32Array;   // [R,G,B, ...] 正規化済み (0–1)、N*3 要素
-  alpha: Float32Array; // マスク (0–1)、N 要素
-  mean: number;        // ZNCC 用：加重平均（全チャネル合算）
+  rgb: Float32Array;        // [R,G,B, ...] 正規化済み (0–1)、N*3 要素
+  alpha: Float32Array;      // マスク (0–1)、N 要素
+  mean: [number, number, number]; // ZNCC 用：チャネルごとの加重平均 [R, G, B]
 };
 
 let templateCache: Template[] | null = null;
@@ -45,46 +45,79 @@ export async function loadWeaponTemplates(warn?: WarnLogger): Promise<Template[]
         rgb[i * 3 + 2] = data[i * info.channels + 2] / 255;
         alpha[i] = info.channels === 4 ? data[i * info.channels + 3] / 255 : 1;
       }
-      // ZNCC 用：テンプレートの加重平均を事前計算してキャッシュ
-      let wSum = 0, valSum = 0;
-      for (let i = 0; i < N; i++) {
-        const m = alpha[i];
-        if (m < 0.5) continue;
-        for (let c = 0; c < 3; c++) valSum += rgb[i * 3 + c] * m;
-        wSum += m * 3;
-      }
-      const mean = wSum > 0 ? valSum / wSum : 0;
-      templates.push({ id, rgb, alpha, mean });
+      templates.push({ id, rgb, alpha, mean: [0, 0, 0] }); // mean はユニオンマスク適用後に再計算
     } catch (e) {
       warn?.(`[matchWeapon] Failed to load template "${file}", skipping`, e);
     }
   }
+
+  // 同ファミリー（_00/_01/_02/_O）のアルファマスクを OR 合成（max）して比較条件を揃える。
+  // _H/_Oct は独立ブキのためファミリー扱いしない。
+  const familyMap = new Map<string, Template[]>();
+  for (const t of templates) {
+    const m = t.id.match(/^(.+)_(0[012]|O)$/);
+    if (m) {
+      const key = m[1];
+      if (!familyMap.has(key)) familyMap.set(key, []);
+      familyMap.get(key)!.push(t);
+    }
+  }
+  for (const members of familyMap.values()) {
+    const unionAlpha = new Float32Array(N);
+    for (const t of members) {
+      for (let i = 0; i < N; i++) {
+        if (t.alpha[i] > unionAlpha[i]) unionAlpha[i] = t.alpha[i];
+      }
+    }
+    for (const t of members) t.alpha.set(unionAlpha);
+  }
+
+  // ユニオンマスク適用後に全テンプレートの ZNCC 用チャネル別加重平均を計算
+  for (const t of templates) {
+    let wSum = 0;
+    const valSum = [0, 0, 0];
+    for (let i = 0; i < N; i++) {
+      const m = t.alpha[i];
+      if (m < 0.5) continue;
+      for (let c = 0; c < 3; c++) valSum[c] += t.rgb[i * 3 + c] * m;
+      wSum += m;
+    }
+    t.mean = [
+      wSum > 0 ? valSum[0] / wSum : 0,
+      wSum > 0 ? valSum[1] / wSum : 0,
+      wSum > 0 ? valSum[2] / wSum : 0,
+    ];
+  }
+
   return (templateCache = templates);
 }
 
-// ── ゼロ平均正規化相互相関（ZNCC / TM_CCOEFF_NORMED 相当）──────
-// score = Σ(A-Ā)(B-B̄)·M / √(Σ(A-Ā)²·M × Σ(B-B̄)²·M)
-// B̄ はテンプレート側の加重平均（事前計算済み）。
-// Ā はソース側の加重平均（毎回計算）。
-// 白一色などコントラストのないテンプレートは B̄≈B となり分母→0→score=0。
-function zncc(src: Float32Array, tmpl: Float32Array, mask: Float32Array, tmplMean: number): number {
-  // ソース側の加重平均を計算
-  let wSum = 0, srcValSum = 0;
+// ── チャネル別ゼロ平均正規化相互相関（per-channel ZNCC）──────
+// R/G/B それぞれの加重平均を独立して引くことで色相の違いをスコアに反映する。
+// score = Σ_c Σ_i (A_c - Ā_c)(B_c - B̄_c)·M / √(Σ(A-Ā)²·M × Σ(B-B̄)²·M)
+function zncc(src: Float32Array, tmpl: Float32Array, mask: Float32Array, tmplMean: [number, number, number]): number {
+  // ソース側のチャネル別加重平均を計算
+  let wSum = 0;
+  const srcValSum = [0, 0, 0];
   for (let i = 0; i < N; i++) {
     const m = mask[i];
     if (m < 0.5) continue;
-    for (let c = 0; c < 3; c++) srcValSum += src[i * 3 + c] * m;
-    wSum += m * 3;
+    for (let c = 0; c < 3; c++) srcValSum[c] += src[i * 3 + c] * m;
+    wSum += m;
   }
-  const srcMean = wSum > 0 ? srcValSum / wSum : 0;
+  const srcMean: [number, number, number] = [
+    wSum > 0 ? srcValSum[0] / wSum : 0,
+    wSum > 0 ? srcValSum[1] / wSum : 0,
+    wSum > 0 ? srcValSum[2] / wSum : 0,
+  ];
 
   let sumAB = 0, sumA2 = 0, sumB2 = 0;
   for (let i = 0; i < N; i++) {
     const m = mask[i];
     if (m < 0.5) continue;
     for (let c = 0; c < 3; c++) {
-      const a = src[i * 3 + c] - srcMean;
-      const b = tmpl[i * 3 + c] - tmplMean;
+      const a = src[i * 3 + c] - srcMean[c];
+      const b = tmpl[i * 3 + c] - tmplMean[c];
       sumAB += a * b * m;
       sumA2 += a * a * m;
       sumB2 += b * b * m;
