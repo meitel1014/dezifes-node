@@ -24,3 +24,6 @@ export type { WeaponAliases } from './weaponAliases';
 
 export { screenshotDirSchema } from './screenshotDir';
 export type { ScreenshotDir } from './screenshotDir';
+
+export { googleSheetSyncSchema, gasEndpointConfiguredSchema } from './googleSheetSync';
+export type { GoogleSheetSync, GasEndpointConfigured } from './googleSheetSync';
