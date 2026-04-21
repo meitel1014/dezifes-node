@@ -12,7 +12,6 @@ import type {
 } from '@/schemas';
 
 type Props = { mode: Mode };
-type NonNullCandidate = NonNullable<MatchCandidate>;
 
 const TOP_N_WEAPONS = 10;
 
@@ -68,7 +67,7 @@ export function ResultsPanel({ mode }: Props) {
 
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.png') && !file.type.startsWith('image/')) {
+    if (!file.name.toLowerCase().endsWith('.png') || !file.type.startsWith('image/png')) {
       setUploadError('PNG ファイルをドロップしてください');
       return;
     }
@@ -182,7 +181,7 @@ export function ResultsPanel({ mode }: Props) {
 type EditorProps = {
   mode: Mode;
   candidateIndex: number;
-  cand: NonNullCandidate;
+  cand: MatchCandidate;
   aliases: WeaponAliases | undefined;
   teamsPool: TeamsPool;
   showAllWeapons: Record<string, boolean>;
