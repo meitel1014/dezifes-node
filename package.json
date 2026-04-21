@@ -15,6 +15,13 @@
     "compatibleRange": "^2.0.0",
     "dashboardPanels": [
       {
+        "name": "mode-select",
+        "title": "モード切替",
+        "file": "mode-select.html",
+        "workspace": "Battle",
+        "width": 4
+      },
+      {
         "name": "turf-war-team-select",
         "title": "チーム選択",
         "file": "turf-war-team-select.html",
@@ -23,7 +30,7 @@
       },
       {
         "name": "turf-war-buttons",
-        "title": "表示操作・モード切替",
+        "title": "表示操作",
         "file": "turf-war-buttons.html",
         "workspace": "Battle",
         "width": 4
