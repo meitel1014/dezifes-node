@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type {
+  ActiveMode,
   MatchCandidates,
   Selection,
   TeamsPool,
@@ -20,6 +21,7 @@ type ReplicantOf<T> = { value: T | undefined };
 
 export type StartScreenshotWatcherOptions = {
   screenshotDir: string;
+  activeModeRep: ReplicantOf<ActiveMode>;
   teamsPoolRep: ReplicantOf<TeamsPool>;
   selectionRep: ReplicantOf<Selection>;
   visibilityRep: ReplicantOf<Visibility>;
@@ -36,7 +38,7 @@ const DEBOUNCE_MS = 200;
 export function startScreenshotWatcher(
   opts: StartScreenshotWatcherOptions
 ): { markProcessed: (filename: string) => void; stop: () => void } {
-  const { screenshotDir, teamsPoolRep, selectionRep, visibilityRep, matchCandidatesRep, log } = opts;
+  const { screenshotDir, activeModeRep, teamsPoolRep, selectionRep, visibilityRep, matchCandidatesRep, log } = opts;
   const absDir = path.resolve(process.cwd(), screenshotDir);
   fs.mkdirSync(absDir, { recursive: true });
 
@@ -82,6 +84,7 @@ export function startScreenshotWatcher(
     const full = path.join(absDir, filename);
     if (!fs.existsSync(full)) return;
 
+    const mode: Mode = activeModeRep.value ?? 'turfWar';
     const visibility = visibilityRep.value;
     const selection = selectionRep.value;
     const pool = teamsPoolRep.value;
@@ -91,26 +94,21 @@ export function startScreenshotWatcher(
       return;
     }
 
-    const targetModes: Mode[] = (['turfWar', 'splatZones'] as const).filter(
-      (m) => visibility[m].alpha && visibility[m].bravo
-    );
-    if (targetModes.length === 0) {
-      log.info(`[screenshotWatcher] ${filename}: 両チームvisible なモードが無いのでスキップ`);
+    if (!visibility[mode].alpha || !visibility[mode].bravo) {
+      log.info(`[screenshotWatcher] ${filename}: ${mode} の両チームが visible でないのでスキップ`);
       return;
     }
 
-    for (const mode of targetModes) {
-      log.info(`[screenshotWatcher] OCR start: ${filename} (mode=${mode})`);
-      const cand = await processScreenshot({
-        screenshotPath: full,
-        sourceFile: filename,
-        mode,
-        selection,
-        teamsPool: pool,
-        log,
-      });
-      if (!cand) continue;
-
+    log.info(`[screenshotWatcher] OCR start: ${filename} (mode=${mode})`);
+    const cand = await processScreenshot({
+      screenshotPath: full,
+      sourceFile: filename,
+      mode,
+      selection,
+      teamsPool: pool,
+      log,
+    });
+    if (cand) {
       const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };
       matchCandidatesRep.value = pushToQueue(cur, mode, cand);
       log.info(`[screenshotWatcher] OCR done: ${filename} (mode=${mode})`);

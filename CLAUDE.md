@@ -37,14 +37,15 @@ npx nodecg start   # pnpm build 後の本番起動
 
 NodeCG は **Dashboard** / **Graphics** / **Extension** の 3 コンポーネントで構成される。
 
-- **Dashboard** ([src/browser/dashboard/](src/browser/dashboard/)) — 運営用の操作パネル（3 Workspace: ナワバリ / エリア / 設定）
-- **Graphics** ([src/browser/graphics/](src/browser/graphics/)) — 配信画面に載せるオーバーレイ（4 ページ）
+- **Dashboard** ([src/browser/dashboard/](src/browser/dashboard/)) — 運営用の操作パネル（2 Workspace: Battle / 設定）
+- **Graphics** ([src/browser/graphics/](src/browser/graphics/)) — 配信画面に載せるオーバーレイ（2 ページ）
 - **Extension** ([src/extension/index.ts](src/extension/index.ts)) — CSV ロード、メッセージハンドラ、Replicant 管理
 
 ### Replicant（状態同期）
 
 | Replicant名 | 型 | 用途 |
 |---|---|---|
+| `activeMode` | `'turfWar' \| 'splatZones'` | Dashboard で現在操作中のモード（デフォルト: `turfWar`） |
 | `teamsPool` | `TeamsPool` | モード別チーム一覧（CSV 由来、編集で上書き） |
 | `selection` | `Selection` | モード別 アルファ/ブラボー 選択チーム名 |
 | `visibility` | `Visibility` | モード別 アルファ/ブラボー 表示状態（フェードイン/アウト制御） |

@@ -31,6 +31,7 @@ export default (nodecg: NodeCG) => {
   const screenshotDirRep = nodecg.Replicant('screenshotDir');
   const googleSheetSyncRep = nodecg.Replicant('googleSheetSync');
   const gasEndpointConfiguredRep = nodecg.Replicant('gasEndpointConfigured');
+  const activeModeRep = nodecg.Replicant('activeMode');
 
   const gasEndpointUrl = process.env['GAS_ENDPOINT_URL'];
   gasEndpointConfiguredRep.value = !!gasEndpointUrl;
@@ -61,6 +62,7 @@ export default (nodecg: NodeCG) => {
   // スクショ監視を起動（ディレクトリ変更時は再起動）
   let watcherHandle = startScreenshotWatcher({
     screenshotDir: screenshotDirRep.value ?? 'data/screenshots',
+    activeModeRep,
     teamsPoolRep,
     selectionRep,
     visibilityRep,
@@ -72,6 +74,7 @@ export default (nodecg: NodeCG) => {
     watcherHandle.stop();
     watcherHandle = startScreenshotWatcher({
       screenshotDir: newDir ?? 'data/screenshots',
+      activeModeRep,
       teamsPoolRep,
       selectionRep,
       visibilityRep,

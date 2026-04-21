@@ -1,0 +1,52 @@
+:root {
+  --accent-turf-war: #fc1cf7;
+  --accent-splat-zones: #30fefe;
+}
+
+.mode-select-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mode-select-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mode-select-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-select-btn {
+  flex: 1;
+  padding: 12px 8px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.mode-select-btn:hover {
+  background: #1e2d4a;
+}
+
+.mode-select-btn--turf-war.active {
+  border-color: var(--accent-turf-war);
+  color: var(--accent-turf-war);
+  background: color-mix(in srgb, var(--accent-turf-war) 10%, var(--bg-surface));
+}
+
+.mode-select-btn--splat-zones.active {
+  border-color: var(--accent-splat-zones);
+  color: var(--accent-splat-zones);
+  background: color-mix(in srgb, var(--accent-splat-zones) 10%, var(--bg-surface));
+}

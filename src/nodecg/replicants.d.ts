@@ -1,4 +1,5 @@
 import type {
+  ActiveMode,
   TeamsPool,
   Selection,
   Visibility,
@@ -14,6 +15,7 @@ import type {
  * すべてのReplicantの型を定義するマップ
  */
 export type ReplicantMap = {
+  activeMode: ActiveMode;
   teamsPool: TeamsPool;
   selection: Selection;
   visibility: Visibility;
