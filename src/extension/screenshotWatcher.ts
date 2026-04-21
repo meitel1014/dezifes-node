@@ -8,6 +8,7 @@ import type {
 } from '../schemas';
 import type { Mode } from '../nodecg/messages';
 import { processScreenshot } from './ocr/processScreenshot';
+import { pushToQueue } from './candidateQueue';
 
 type Logger = {
   info: (message: string, ...args: unknown[]) => void;
@@ -110,8 +111,8 @@ export function startScreenshotWatcher(
       });
       if (!cand) continue;
 
-      const cur = matchCandidatesRep.value ?? { turfWar: null, splatZones: null };
-      matchCandidatesRep.value = { ...cur, [mode]: cand };
+      const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };
+      matchCandidatesRep.value = pushToQueue(cur, mode, cand);
       log.info(`[screenshotWatcher] OCR done: ${filename} (mode=${mode})`);
     }
   };

@@ -9,6 +9,7 @@ import {
 } from './weaponAliases';
 import { appendMatchCsv } from './appendMatchCsv';
 import { startScreenshotWatcher } from './screenshotWatcher';
+import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
 import { processScreenshot } from './ocr/processScreenshot';
 import type { Match, PickCandidate } from '../schemas';
@@ -154,8 +155,8 @@ export default (nodecg: NodeCG) => {
           log.warn(`[upload] OCR skipped: ${filename} — α/β チームが選択されていません`);
           return;
         }
-        const cur = matchCandidatesRep.value ?? { turfWar: null, splatZones: null };
-        matchCandidatesRep.value = { ...cur, [mode]: cand };
+        const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };
+        matchCandidatesRep.value = pushToQueue(cur, mode, cand);
         log.info(`[upload] OCR done: ${filename} (mode=${mode})`);
       }).catch((e) => log.error(`[upload] OCR 失敗: ${filename}`, e));
     });
@@ -229,13 +230,14 @@ export default (nodecg: NodeCG) => {
   });
 
   // 判定結果候補の 1 マスを手動修正（playerName/weaponId の差分を反映）
-  nodecg.listenFor('updateMatchCandidate', ({ mode, side, position, patch }, ack) => {
+  nodecg.listenFor('updateMatchCandidate', ({ mode, candidateIndex, side, position, patch }, ack) => {
     const cands = matchCandidatesRep.value;
-    if (!cands || !cands[mode]) {
+    const queue = cands?.[mode] ?? [];
+    const cand = queue[candidateIndex];
+    if (!cands || !cand) {
       if (ack && !ack.handled) ack(null);
       return;
     }
-    const cand = cands[mode];
 
     const sideData = cand[side];
     const newPicks = replacePick(sideData.picks, position, (p) => ({
@@ -246,23 +248,22 @@ export default (nodecg: NodeCG) => {
       },
     }));
 
+    const updatedCand = { ...cand, [side]: { ...sideData, picks: newPicks } };
     matchCandidatesRep.value = {
       ...cands,
-      [mode]: {
-        ...cand,
-        [side]: { ...sideData, picks: newPicks },
-      },
+      [mode]: queue.map((c, i) => (i === candidateIndex ? updatedCand : c)),
     };
     if (ack && !ack.handled) ack(null);
   });
 
-  nodecg.listenFor('confirmMatchCandidate', ({ mode }, ack) => {
+  nodecg.listenFor('confirmMatchCandidate', ({ mode, candidateIndex }, ack) => {
     const cands = matchCandidatesRep.value;
-    if (!cands || !cands[mode]) {
+    const queue = cands?.[mode] ?? [];
+    const cand = queue[candidateIndex];
+    if (!cands || !cand) {
       if (ack && !ack.handled) ack(null);
       return;
     }
-    const cand = cands[mode];
 
     const match: Match = {
       id: crypto.randomUUID(),
@@ -280,7 +281,10 @@ export default (nodecg: NodeCG) => {
     };
 
     matchesRep.value = [...(matchesRep.value ?? []), match];
-    matchCandidatesRep.value = { ...cands, [mode]: null };
+    matchCandidatesRep.value = {
+      ...cands,
+      [mode]: queue.filter((_, i) => i !== candidateIndex),
+    };
 
     try {
       appendMatchCsv(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null);
@@ -292,13 +296,17 @@ export default (nodecg: NodeCG) => {
     if (ack && !ack.handled) ack(null);
   });
 
-  nodecg.listenFor('dismissMatchCandidate', ({ mode }, ack) => {
+  nodecg.listenFor('dismissMatchCandidate', ({ mode, candidateIndex }, ack) => {
     const cands = matchCandidatesRep.value;
     if (!cands) {
       if (ack && !ack.handled) ack(null);
       return;
     }
-    matchCandidatesRep.value = { ...cands, [mode]: null };
+    const queue = cands[mode] ?? [];
+    matchCandidatesRep.value = {
+      ...cands,
+      [mode]: queue.filter((_, i) => i !== candidateIndex),
+    };
     if (ack && !ack.handled) ack(null);
   });
 
