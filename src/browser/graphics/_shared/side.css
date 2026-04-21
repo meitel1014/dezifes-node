@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=block');
+
 /*
   side: 1920x1080 → 左上 960x960 (alpha) / 右上 960x960 (bravo)
   会場の映像機器で左右分割して使う想定。
@@ -9,9 +11,10 @@
   これにより、チーム名が 1 行でも 2 行でもプレイヤー名の位置は動かない。
 */
 :root {
-  font-family: "vdl-gigag", "Noto Sans JP";
+  font-family: "vdl-gigag", "Noto Emoji", "Noto Sans JP";
   font-style: normal;
   font-weight: 500;
+  font-variant-emoji: text;
   color: #ffffff;
   letter-spacing: -0.2em;
 }

@@ -41,8 +41,4 @@ export type MessageMap = {
   /** data/weapon_aliases.csv を再読込して weaponAliases Replicant に反映 */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
   reloadWeaponAliases: {};
-
-  /** data/weapon_flat_10_0_0/ を走査して data/weapon_aliases.csv のひな型を生成 */
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
-  generateWeaponAliasesCsv: {};
 };

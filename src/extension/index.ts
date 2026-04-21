@@ -4,10 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import type { NodeCG } from './nodecg';
 import { loadTeamsPoolFromCsv } from './loadTeams';
-import {
-  generateWeaponAliasesCsv,
-  loadWeaponAliasesFromCsv,
-} from './weaponAliases';
+import { loadWeaponAliasesFromCsv } from './weaponAliases';
 import { appendMatchCsv } from './appendMatchCsv';
 import { appendGoogleSheet } from './appendGoogleSheet';
 import { startScreenshotWatcher } from './screenshotWatcher';
@@ -337,14 +334,6 @@ export default (nodecg: NodeCG) => {
     if (ack && !ack.handled) ack(null);
   });
 
-  nodecg.listenFor('generateWeaponAliasesCsv', (_data, ack) => {
-    const result = generateWeaponAliasesCsv();
-    log.info(
-      `Generated data/weapon_aliases.csv: total=${result.total}, added=${result.added}`
-    );
-    weaponAliasesRep.value = loadWeaponAliasesFromCsv();
-    if (ack && !ack.handled) ack(null);
-  });
 
 };
 
