@@ -37,7 +37,7 @@ npx nodecg start   # pnpm build 後の本番起動
 
 NodeCG は **Dashboard** / **Graphics** / **Extension** の 3 コンポーネントで構成される。
 
-- **Dashboard** ([src/browser/dashboard/](src/browser/dashboard/)) — 運営用の操作パネル（2 Workspace: 試合操作 / 設定）
+- **Dashboard** ([src/browser/dashboard/](src/browser/dashboard/)) — 運営用の操作パネル（2 Workspace: Battle / 設定）
 - **Graphics** ([src/browser/graphics/](src/browser/graphics/)) — 配信画面に載せるオーバーレイ（2 ページ）
 - **Extension** ([src/extension/index.ts](src/extension/index.ts)) — CSV ロード、メッセージハンドラ、Replicant 管理
 
