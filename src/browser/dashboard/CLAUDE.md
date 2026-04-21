@@ -11,6 +11,7 @@
 | エリア | `splat-zones-preview` | エリア｜プレビュー編集 | 8 |
 | エリア | `splat-zones-results` | エリア｜判定結果 | 8 |
 | 設定 | `settings-csv-reload` | 設定｜CSV 再読込 | 4 |
+| 設定 | `settings-google-sheet` | 設定｜Google スプレッドシート同期 | 4 |
 
 ナワバリとエリアは同一構造で `mode` プロップだけ異なる。共通ロジックは `_shared/` に集約。
 

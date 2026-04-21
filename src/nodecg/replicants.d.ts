@@ -6,6 +6,8 @@ import type {
   MatchCandidates,
   WeaponAliases,
   ScreenshotDir,
+  GoogleSheetSync,
+  GasEndpointConfigured,
 } from '../schemas';
 
 /**
@@ -19,4 +21,6 @@ export type ReplicantMap = {
   matchCandidates: MatchCandidates;
   weaponAliases: WeaponAliases;
   screenshotDir: ScreenshotDir;
+  googleSheetSync: GoogleSheetSync;
+  gasEndpointConfigured: GasEndpointConfigured;
 };

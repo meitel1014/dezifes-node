@@ -1,3 +1,4 @@
+import './env';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -8,6 +9,7 @@ import {
   loadWeaponAliasesFromCsv,
 } from './weaponAliases';
 import { appendMatchCsv } from './appendMatchCsv';
+import { appendGoogleSheet } from './appendGoogleSheet';
 import { startScreenshotWatcher } from './screenshotWatcher';
 import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
@@ -30,6 +32,11 @@ export default (nodecg: NodeCG) => {
   const matchCandidatesRep = nodecg.Replicant('matchCandidates');
   const weaponAliasesRep = nodecg.Replicant('weaponAliases');
   const screenshotDirRep = nodecg.Replicant('screenshotDir');
+  const googleSheetSyncRep = nodecg.Replicant('googleSheetSync');
+  const gasEndpointConfiguredRep = nodecg.Replicant('gasEndpointConfigured');
+
+  const gasEndpointUrl = process.env['GAS_ENDPOINT_URL'];
+  gasEndpointConfiguredRep.value = !!gasEndpointUrl;
 
   // 初回起動時のみ CSV から teamsPool を初期化。
   const isEmptyPool = (pool: typeof teamsPoolRep.value) =>
@@ -291,6 +298,12 @@ export default (nodecg: NodeCG) => {
       log.info(`Match confirmed: ${match.id} (${mode}) -> data/matches.csv`);
     } catch (e) {
       log.error('Failed to append matches.csv', e);
+    }
+
+    if (googleSheetSyncRep.value && gasEndpointUrl) {
+      appendGoogleSheet(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null, gasEndpointUrl)
+        .then(() => log.info(`Match synced to Google Sheet: ${match.id}`))
+        .catch((e) => log.error('Failed to append to Google Sheet', e));
     }
 
     if (ack && !ack.handled) ack(null);
