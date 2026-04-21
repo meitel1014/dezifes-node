@@ -1,3 +1,6 @@
+export { activeModeSchema } from './activeMode';
+export type { ActiveMode } from './activeMode';
+
 export { bundleConfigSchema } from './bundleConfig';
 export type { BundleConfig } from './bundleConfig';
 

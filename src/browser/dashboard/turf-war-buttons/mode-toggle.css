@@ -1,0 +1,39 @@
+.mode-buttons-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mode-toggle-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-toggle-btn {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.mode-toggle-btn:hover {
+  background: #1e2d4a;
+}
+
+.mode-toggle-btn--turf-war.active {
+  border-color: var(--accent-alpha);
+  color: var(--accent-alpha);
+  background: color-mix(in srgb, var(--accent-alpha) 10%, var(--bg-surface));
+}
+
+.mode-toggle-btn--splat-zones.active {
+  border-color: var(--accent-bravo);
+  color: var(--accent-bravo);
+  background: color-mix(in srgb, var(--accent-bravo) 10%, var(--bg-surface));
+}

@@ -31,6 +31,7 @@ export default (nodecg: NodeCG) => {
   const screenshotDirRep = nodecg.Replicant('screenshotDir');
   const googleSheetSyncRep = nodecg.Replicant('googleSheetSync');
   const gasEndpointConfiguredRep = nodecg.Replicant('gasEndpointConfigured');
+  nodecg.Replicant('activeMode');
 
   const gasEndpointUrl = process.env['GAS_ENDPOINT_URL'];
   gasEndpointConfiguredRep.value = !!gasEndpointUrl;
