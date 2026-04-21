@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * 各モードで α / β に選択されたチーム ID（null は未選択）。
+ * 各モードで アルファ / ブラボー に選択されたチーム ID（null は未選択）。
  * ID は TeamsPool 内で一意のキーとして扱う。
  */
 const slotSchema = z

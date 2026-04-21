@@ -35,7 +35,7 @@ type ProcessInput = {
 };
 
 /**
- * 指定モードの α/β 両選択チームに対して OCR を実行し、判定結果を matchCandidate として返す。
+ * 指定モードの アルファ/ブラボー 両選択チームに対して OCR を実行し、判定結果を matchCandidate として返す。
  * 選択が未完了 or チームが見つからない場合は null を返す（呼び出し側で無視）。
  */
 export async function processScreenshot(
@@ -45,7 +45,7 @@ export async function processScreenshot(
 
   const slot = selection[mode];
   if (!slot.alpha || !slot.bravo) {
-    log.warn(`[ocr] ${mode}: α/β 未選択のためスキップ`);
+    log.warn(`[ocr] ${mode}: アルファ/ブラボー 未選択のためスキップ`);
     return null;
   }
   const alphaTeam = teamsPool[mode].find((t) => t.id === slot.alpha);

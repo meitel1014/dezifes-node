@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * 各モードの α / β の表示状態。true でフェードイン表示、false で非表示。
+ * 各モードの アルファ / ブラボー の表示状態。true でフェードイン表示、false で非表示。
  */
 const sideVisibilitySchema = z
   .object({

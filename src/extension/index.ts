@@ -152,7 +152,7 @@ export default (nodecg: NodeCG) => {
         log,
       }).then((cand) => {
         if (!cand) {
-          log.warn(`[upload] OCR skipped: ${filename} — α/β チームが選択されていません`);
+          log.warn(`[upload] OCR skipped: ${filename} — アルファ/ブラボー チームが選択されていません`);
           return;
         }
         const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };

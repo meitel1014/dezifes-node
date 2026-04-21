@@ -3,7 +3,7 @@
 1. Extension 起動時に `data/weapon_aliases.csv` を読み `weaponAliases` Replicant を初期化
 2. `data/screenshots/` を chokidar で監視。PNG が追加されると OCR 処理を起動
 3. **OCR 処理（`processScreenshot.ts`）**:
-   - `selection[mode]` の α/β チームを確認（未選択なら skip）
+   - `selection[mode]` の アルファ/ブラボー チームを確認（未選択なら skip）
    - 4 ポジションを**逐次**処理（CPU スパイク平坦化のため `setImmediate` yield を使用）
    - プレイヤー名: `data/Splatoon2-merged.ttf` でレンダリングした比較画像との MSE スライディングウィンドウ照合
    - ブキ: `data/weapon_flat_10_0_0/` テンプレートとの ZNCC（ゼロ平均正規化相互相関）、15 テンプレートごとに yield

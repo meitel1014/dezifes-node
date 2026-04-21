@@ -403,8 +403,8 @@ function HistoryItem({ match, teamsPool, aliases }: HistoryItemProps) {
       </button>
       {open ? (
         <div className="history-detail">
-          <HistorySide title="α" name={alphaName} picks={match.alpha.picks} aliases={aliases} />
-          <HistorySide title="β" name={bravoName} picks={match.bravo.picks} aliases={aliases} />
+          <HistorySide title="アルファ" name={alphaName} picks={match.alpha.picks} aliases={aliases} />
+          <HistorySide title="ブラボー" name={bravoName} picks={match.bravo.picks} aliases={aliases} />
           <button className="btn-sm btn-cancel" onClick={handleDelete}>
             この記録を削除
           </button>

@@ -12,7 +12,7 @@ export type MessageMap = {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- ts-nodecg の規約：データなしメッセージは {} で表現
   reloadTeamsCsv: {};
 
-  /** 指定モードの α/β 両方を非表示にし、選択も初期化する */
+  /** 指定モードの アルファ/ブラボー 両方を非表示にし、選択も初期化する */
   resetMode: { data: { mode: Mode } };
 
   /** teamsPool 内の 1 チームを ID キーで部分更新する */
