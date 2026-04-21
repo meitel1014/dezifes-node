@@ -1,10 +1,8 @@
+import './env';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
-import { config as dotenvConfig } from 'dotenv';
 import type { NodeCG } from './nodecg';
-
-dotenvConfig({ path: path.resolve(process.cwd(), '.env') });
 import { loadTeamsPoolFromCsv } from './loadTeams';
 import {
   generateWeaponAliasesCsv,

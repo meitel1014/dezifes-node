@@ -41,6 +41,11 @@ export async function appendGoogleSheet(
     if (!res.ok) {
       throw new Error(`GAS returned HTTP ${res.status}`);
     }
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      throw new Error(`GAS request timed out after ${TIMEOUT_MS}ms`);
+    }
+    throw e;
   } finally {
     clearTimeout(timer);
   }

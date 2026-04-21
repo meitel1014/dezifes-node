@@ -10,7 +10,7 @@ export function GoogleSheetSyncPanel() {
         <span className="toggle-label">Google スプレッドシート同期</span>
         <button
           className={`toggle-btn ${syncEnabled ? 'toggle-btn--on' : ''}`}
-          onClick={() => setSyncEnabled(!syncEnabled)}
+          onClick={() => setSyncEnabled(!(syncEnabled ?? false))}
           disabled={syncEnabled === undefined}
         >
           {syncEnabled ? 'ON（CSV + Sheets）' : 'OFF（CSV のみ）'}
