@@ -138,10 +138,10 @@ export async function appendWeaponGoogleSheet(
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(endpointUrl + '/weapons', {
+    const res = await fetch(endpointUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rows }),
+      body: JSON.stringify({ type: 'weapons', rows }),
       signal: controller.signal,
     });
     if (!res.ok) {
