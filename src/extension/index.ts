@@ -5,8 +5,8 @@ import fs from 'node:fs';
 import type { NodeCG } from './nodecg';
 import { loadTeamsPoolFromCsv } from './loadTeams';
 import { loadWeaponAliasesFromCsv } from './weaponAliases';
-import { appendMatchCsv } from './appendMatchCsv';
-import { appendGoogleSheet } from './appendGoogleSheet';
+import { appendWeaponCsv, appendWeaponGoogleSheet } from './appendWeapon';
+import { appendResultCsv, appendResultGoogleSheet } from './appendResult';
 import { startScreenshotWatcher } from './screenshotWatcher';
 import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
@@ -173,6 +173,44 @@ export default (nodecg: NodeCG) => {
     });
   });
 
+  // OBSから勝利メッセージを受信するエンドポイント
+  // POST /result  (body: result: alpha_win or bravo_win (application/json))
+  nodecg.mount('/result', (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).end();
+      return;
+    }
+
+    const mode = activeModeRep.value;
+    const selection = selectionRep.value;
+    if (!mode || !selection) {
+      res.status(503).json({ error: 'replicants not ready' });
+      return;
+    }
+
+    const result: string = req.body.result;
+    console.log(result);
+    if (!['alpha_win', 'bravo_win'].includes(result)) {
+      log.error('[result] 試合結果受信エラー:' + result);
+      res.status(400).json({ error: 'invalid result' });
+      return;
+    }
+
+    try {
+      appendResultCsv(selection, mode, result);
+      log.info(`Result confirmed: ${result} -> data/results.csv`);
+    } catch (e) {
+      log.error('Failed to append results.csv', e);
+    }
+
+    if (googleSheetSyncRep.value && gasEndpointUrl) {
+      appendResultGoogleSheet(selection, mode, result, gasEndpointUrl)
+        .then(() => log.info(`Result synced to Google Sheet: ${result}`))
+        .catch((e) => log.error('Failed to append to Google Sheet', e));
+    }
+    res.status(200).end();
+  });
+
   // ── Message ハンドラ ───────────────────────────────────
 
   nodecg.listenFor('reloadTeamsCsv', (_data, ack) => {
@@ -294,14 +332,14 @@ export default (nodecg: NodeCG) => {
     };
 
     try {
-      appendMatchCsv(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null);
+      appendWeaponCsv(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null);
       log.info(`Match confirmed: ${match.id} (${mode}) -> data/matches.csv`);
     } catch (e) {
       log.error('Failed to append matches.csv', e);
     }
 
     if (googleSheetSyncRep.value && gasEndpointUrl) {
-      appendGoogleSheet(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null, gasEndpointUrl)
+      appendWeaponGoogleSheet(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null, gasEndpointUrl)
         .then(() => log.info(`Match synced to Google Sheet: ${match.id}`))
         .catch((e) => log.error('Failed to append to Google Sheet', e));
     }
