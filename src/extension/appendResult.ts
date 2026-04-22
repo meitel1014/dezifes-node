@@ -100,7 +100,7 @@ export async function appendResultGoogleSheet(
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(endpointUrl, {
+    const res = await fetch(endpointUrl + '/result', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ row }),

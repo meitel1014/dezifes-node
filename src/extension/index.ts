@@ -174,8 +174,8 @@ export default (nodecg: NodeCG) => {
   });
 
   // OBSから勝利メッセージを受信するエンドポイント
-  // POST /battle-result  (body: alpha-win or bravo-win (text/plain))
-  nodecg.mount('/battle-result', (req, res) => {
+  // POST /result  (body: alpha_win or bravo_win (text/plain))
+  nodecg.mount('/result', (req, res) => {
     if (req.method !== 'POST') {
       res.status(405).end();
       return;
@@ -189,9 +189,9 @@ export default (nodecg: NodeCG) => {
     }
 
     const result: string = req.body;
-    if (!(result in ['alpha_win', 'bravo_win'])) {
-      log.error('[battle-result] 試合結果受信エラー:' + result);
-      res.status(500).json({ error: 'invalid result' });
+    if (!['alpha_win', 'bravo_win'].includes(result)) {
+      log.error('[result] 試合結果受信エラー:' + result);
+      res.status(400).json({ error: 'invalid result' });
       return;
     }
 
