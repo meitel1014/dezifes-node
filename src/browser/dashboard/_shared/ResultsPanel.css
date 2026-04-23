@@ -210,24 +210,24 @@
   gap: 8px;
 }
 
-.btn-confirm {
+button.btn-confirm {
   flex: 1;
   border-color: var(--accent-success);
   color: var(--accent-success);
 }
 
-.btn-confirm:hover {
+button.btn-confirm:hover {
   background: color-mix(in srgb, var(--accent-success) 12%, transparent);
 }
 
-.btn-dismiss {
+button.btn-dismiss {
   flex: 0 0 30%;
   border-color: color-mix(in srgb, var(--accent-danger) 40%, transparent);
   color: var(--accent-danger);
   background: transparent;
 }
 
-.btn-dismiss:hover {
+button.btn-dismiss:hover {
   background: color-mix(in srgb, var(--accent-danger) 10%, transparent);
 }
 

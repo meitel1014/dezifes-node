@@ -4,33 +4,33 @@
   gap: 8px;
 }
 
-.btn-alpha {
+button.btn-alpha {
   border: 1px solid var(--accent-alpha);
 }
 
-.btn-bravo {
+button.btn-bravo {
   border: 1px solid var(--accent-bravo);
 }
 
-.btn-alpha.active {
+button.btn-alpha.active {
   background: color-mix(in srgb, var(--accent-alpha) 20%, transparent);
   border-color: var(--accent-alpha);
   color: var(--accent-alpha);
 }
 
-.btn-bravo.active {
+button.btn-bravo.active {
   background: color-mix(in srgb, var(--accent-bravo) 20%, transparent);
   border-color: var(--accent-bravo);
   color: var(--accent-bravo);
 }
 
-.btn-reset {
+button.btn-reset {
   margin-top: 4px;
   border-color: color-mix(in srgb, var(--accent-danger) 40%, transparent);
   color: var(--accent-danger);
   background: transparent;
 }
 
-.btn-reset:hover {
+button.btn-reset:hover {
   background: color-mix(in srgb, var(--accent-danger) 10%, transparent);
 }
