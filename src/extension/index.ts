@@ -7,7 +7,6 @@ import { loadTeamsPoolFromCsv } from './loadTeams';
 import { loadWeaponAliasesFromCsv } from './weaponAliases';
 import { appendWeaponCsv, appendWeaponGoogleSheet } from './appendWeapon';
 import { appendResultCsv, appendResultGoogleSheet } from './appendResult';
-import { startScreenshotWatcher } from './screenshotWatcher';
 import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
 import { processScreenshot } from './ocr/processScreenshot';
@@ -59,31 +58,6 @@ export default (nodecg: NodeCG) => {
   const getScreenshotAbsDir = () =>
     path.resolve(process.cwd(), screenshotDirRep.value ?? 'data/screenshots');
 
-  // スクショ監視を起動（ディレクトリ変更時は再起動）
-  let watcherHandle = startScreenshotWatcher({
-    screenshotDir: screenshotDirRep.value ?? 'data/screenshots',
-    activeModeRep,
-    teamsPoolRep,
-    selectionRep,
-    visibilityRep,
-    matchCandidatesRep,
-    log,
-  });
-
-  screenshotDirRep.on('change', (newDir) => {
-    watcherHandle.stop();
-    watcherHandle = startScreenshotWatcher({
-      screenshotDir: newDir ?? 'data/screenshots',
-      activeModeRep,
-      teamsPoolRep,
-      selectionRep,
-      visibilityRep,
-      matchCandidatesRep,
-      log,
-    });
-    log.info(`Screenshot watcher restarted: ${newDir ?? 'data/screenshots'}`);
-  });
-
   // NodeCG の HTTP listen 完了後にブキテンプレートを事前ロード。
   // 初回 OCR 実行時の待ち時間を削減するため。
   setImmediate(() => {
@@ -107,21 +81,15 @@ export default (nodecg: NodeCG) => {
     }
   });
 
-  // ダッシュボードから PNG をドロップして OCR を手動起動するためのアップロードエンドポイント
-  // POST /upload-screenshot?mode=turfWar  (body: raw PNG binary)
-  nodecg.mount('/upload-screenshot', (req, res) => {
+  // OBS・外部ツールから base64 PNG を受け取り OCR を実行するエンドポイント
+  // POST /weapons  (body: <raw base64 PNG>, Content-Type: text/plain)
+  nodecg.mount('/weapons', (req, res) => {
     if (req.method !== 'POST') {
       res.status(405).end();
       return;
     }
 
-    const modeParam = req.query['mode'];
-    const mode: Mode | null =
-      modeParam === 'turfWar' || modeParam === 'splatZones' ? modeParam : null;
-    if (!mode) {
-      res.status(400).json({ error: 'invalid mode' });
-      return;
-    }
+    const mode: Mode = activeModeRep.value ?? 'turfWar';
 
     const selection = selectionRep.value;
     const pool = teamsPoolRep.value;
@@ -130,26 +98,31 @@ export default (nodecg: NodeCG) => {
       return;
     }
 
-    // watcher が同ファイルを二重処理しないよう先にマーク
-    const filename = `manual-${Date.now()}.png`;
-    watcherHandle.markProcessed(filename);
+    const filename = `weapons-${Date.now()}.png`;
 
+    // NodeCG の global JSON body-parser（100kb 制限）を回避するためストリームで収集
     const chunks: Buffer[] = [];
     req.on('data', (chunk: Buffer) => chunks.push(chunk));
     req.on('end', () => {
+      const content = Buffer.concat(chunks).toString('utf8').trim();
+      if (!content) {
+        res.status(400).json({ error: 'empty body' });
+        return;
+      }
+
+      const pngBuffer = Buffer.from(content, 'base64');
       const absDir = getScreenshotAbsDir();
       try {
-        fs.writeFileSync(path.join(absDir, filename), Buffer.concat(chunks));
+        fs.writeFileSync(path.join(absDir, filename), pngBuffer);
       } catch (e) {
-        log.error('[upload] ファイル保存失敗', e);
+        log.error('[weapons] ファイル保存失敗', e);
         res.status(500).json({ error: 'write failed' });
         return;
       }
 
-      // 202 をすぐ返し、OCR は非同期で実行
       res.status(202).json({ filename });
 
-      log.info(`[upload] OCR start: ${filename} (mode=${mode})`);
+      log.info(`[weapons] OCR start: ${filename} (mode=${mode})`);
       void processScreenshot({
         screenshotPath: path.join(absDir, filename),
         sourceFile: filename,
@@ -159,17 +132,17 @@ export default (nodecg: NodeCG) => {
         log,
       }).then((cand) => {
         if (!cand) {
-          log.warn(`[upload] OCR skipped: ${filename} — アルファ/ブラボー チームが選択されていません`);
+          log.warn(`[weapons] OCR skipped: ${filename} — アルファ/ブラボー チームが選択されていません`);
           return;
         }
         const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };
         matchCandidatesRep.value = pushToQueue(cur, mode, cand);
-        log.info(`[upload] OCR done: ${filename} (mode=${mode})`);
-      }).catch((e) => log.error(`[upload] OCR 失敗: ${filename}`, e));
+        log.info(`[weapons] OCR done: ${filename} (mode=${mode})`);
+      }).catch((e) => log.error(`[weapons] OCR 失敗: ${filename}`, e));
     });
 
     req.on('error', (e) => {
-      log.error('[upload] リクエストエラー', e);
+      log.error('[weapons] リクエストエラー', e);
     });
   });
 

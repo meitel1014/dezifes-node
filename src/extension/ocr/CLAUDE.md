@@ -1,7 +1,10 @@
 # OCR 判定フロー
 
 1. Extension 起動時に `data/weapon_aliases.csv` を読み `weaponAliases` Replicant を初期化
-2. `data/screenshots/` を chokidar で監視。PNG が追加されると OCR 処理を起動
+2. `POST /weapons`（`Content-Type: text/plain`、ボディは生 base64 PNG）で OCR を起動
+   - Dashboard のドラッグ&ドロップ・OBS 等の外部ツール共通のエンドポイント
+   - NodeCG の global JSON body-parser（100kb 制限）を回避するため `text/plain` を使用し、Extension 側でストリーム収集する
+   - PNG は `data/screenshots/weapons-{timestamp}.png` に保存される
 3. **OCR 処理（`processScreenshot.ts`）**:
    - `selection[mode]` の アルファ/ブラボー チームを確認（未選択なら skip）
    - 4 ポジションを**逐次**処理（CPU スパイク平坦化のため `setImmediate` yield を使用）
