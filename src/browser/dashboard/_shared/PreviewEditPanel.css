@@ -102,7 +102,10 @@
   color: var(--text-muted);
 }
 
-.field-value--ingame {
+.preview-alpha .field-value--ingame {
   color: var(--accent-alpha);
-  font-size: 11px;
+}
+
+.preview-bravo .field-value--ingame {
+  color: var(--accent-bravo);
 }
