@@ -82,7 +82,7 @@ export default (nodecg: NodeCG) => {
   });
 
   // OBS・外部ツールから base64 PNG を受け取り OCR を実行するエンドポイント
-  // POST /weapons  (body: {"content": "<raw base64 PNG>"}, Content-Type: application/json)
+  // POST /weapons  (body: <raw base64 PNG>, Content-Type: text/plain)
   nodecg.mount('/weapons', (req, res) => {
     if (req.method !== 'POST') {
       res.status(405).end();
