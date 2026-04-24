@@ -229,6 +229,53 @@
   margin: 0;
 }
 
+.results-winner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.results-winner-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+button.btn-winner {
+  flex: 1;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-color: var(--border);
+  color: var(--text-muted);
+  background: transparent;
+}
+
+button.btn-winner:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+button.btn-winner--selected {
+  font-weight: 700;
+}
+
+button.btn-winner--alpha.btn-winner--selected {
+  border-color: var(--accent-alpha);
+  color: var(--accent-alpha);
+  background: color-mix(in srgb, var(--accent-alpha) 10%, transparent);
+}
+
+button.btn-winner--bravo.btn-winner--selected {
+  border-color: var(--accent-bravo);
+  color: var(--accent-bravo);
+  background: color-mix(in srgb, var(--accent-bravo) 10%, transparent);
+}
+
 .results-actions {
   display: flex;
   gap: 8px;

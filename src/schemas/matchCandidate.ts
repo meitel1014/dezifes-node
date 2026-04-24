@@ -35,6 +35,7 @@ const matchCandidateSchema = z.object({
   createdAt: z.string(),
   alpha: sideCandidateSchema,
   bravo: sideCandidateSchema,
+  wonSide: z.enum(['alpha', 'bravo']).nullable().default(null),
 });
 
 export const matchCandidatesSchema = z

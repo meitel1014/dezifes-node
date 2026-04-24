@@ -205,6 +205,10 @@ function CandidateEditor({
   const bravoTeam = teamsPool[mode].find((t) => t.id === cand.bravo.teamId) ?? null;
 
   const handleConfirm = () => {
+    if (!cand.wonSide) {
+      alert('勝利チームを選択してください');
+      return;
+    }
     for (const side of ['alpha', 'bravo'] as const) {
       const names = cand[side].picks.map((p) => p.selected.playerName).filter(Boolean);
       const dupes = names.filter((n, i) => names.indexOf(n) !== i);
@@ -215,6 +219,10 @@ function CandidateEditor({
     }
     void nodecg.sendMessage('confirmMatchCandidate', { mode, candidateIndex });
     setShowAllWeapons({});
+  };
+  const handleWonSideChange = (side: 'alpha' | 'bravo') => {
+    const newWonSide = cand.wonSide === side ? null : side;
+    void nodecg.sendMessage('setMatchCandidateWonSide', { mode, candidateIndex, wonSide: newWonSide });
   };
   const handleDismiss = () => {
     void nodecg.sendMessage('dismissMatchCandidate', { mode, candidateIndex });
@@ -345,6 +353,21 @@ function CandidateEditor({
       <div className="results-grid">
         {renderSide('alpha')}
         {renderSide('bravo')}
+      </div>
+      <div className="results-winner">
+        <span className="results-winner-label">勝利チーム</span>
+        <button
+          className={`btn btn-winner btn-winner--alpha${cand.wonSide === 'alpha' ? ' btn-winner--selected' : ''}`}
+          onClick={() => handleWonSideChange('alpha')}
+        >
+          アルファ：<Html value={alphaTeam?.name ?? cand.alpha.teamId} />
+        </button>
+        <button
+          className={`btn btn-winner btn-winner--bravo${cand.wonSide === 'bravo' ? ' btn-winner--selected' : ''}`}
+          onClick={() => handleWonSideChange('bravo')}
+        >
+          ブラボー：<Html value={bravoTeam?.name ?? cand.bravo.teamId} />
+        </button>
       </div>
       <div className="results-actions">
         <button className="btn btn-confirm" onClick={handleConfirm}>

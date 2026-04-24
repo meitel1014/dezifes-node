@@ -92,6 +92,7 @@ export async function processScreenshot(
     createdAt: new Date().toISOString(),
     alpha: { teamId: alphaTeam.id, picks: alphaPicks },
     bravo: { teamId: bravoTeam.id, picks: bravoPicks },
+    wonSide: null,
   };
 }
 

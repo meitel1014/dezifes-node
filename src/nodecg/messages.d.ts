@@ -38,6 +38,11 @@ export type MessageMap = {
   /** matches から 1 件削除 */
   deleteMatch: { data: { id: string } };
 
+  /** 判定結果候補の勝利サイドを設定（null で解除） */
+  setMatchCandidateWonSide: {
+    data: { mode: Mode; candidateIndex: number; wonSide: 'alpha' | 'bravo' | null };
+  };
+
   /** data/weapon_aliases.csv を再読込して weaponAliases Replicant に反映 */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
   reloadWeaponAliases: {};
