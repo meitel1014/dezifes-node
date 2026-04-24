@@ -247,6 +247,20 @@
   outline: none;
 }
 
+.player-ingame-name {
+  display: block;
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+.results-alpha .player-ingame-name {
+  color: var(--accent-alpha);
+}
+
+.results-bravo .player-ingame-name {
+  color: var(--accent-bravo);
+}
+
 .weapon-toggle {
   display: inline-flex;
   align-items: center;

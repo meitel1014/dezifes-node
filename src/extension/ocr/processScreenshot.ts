@@ -5,6 +5,7 @@ import { annotateScreenshot } from './annotateScreenshot';
 import { matchPlayerName, rasterizeTextDataUrl } from './matchPlayerName';
 import { matchWeapon } from './matchWeapon';
 import type {
+  InGameNames,
   MatchCandidate,
   PickCandidate,
   Selection,
@@ -33,6 +34,7 @@ type ProcessInput = {
   teamsPool: TeamsPool;
   log: Logger;
   stageCandidate?: { stageName: string; score: number; allScores: { stageName: string; score: number }[] } | null;
+  inGameNames?: InGameNames | null;
 };
 
 /**
@@ -67,7 +69,8 @@ export async function processScreenshot(
     ALPHA_REGIONS,
     alphaTeam.players,
     'alpha',
-    log
+    log,
+    input.inGameNames ?? null,
   );
   const bravoPicks = await ocrSide(
     screenshotPath,
@@ -76,7 +79,8 @@ export async function processScreenshot(
     BRAVO_REGIONS,
     bravoTeam.players,
     'bravo',
-    log
+    log,
+    input.inGameNames ?? null,
   );
 
   let annotatedFile: string | undefined;
@@ -108,16 +112,23 @@ async function ocrSide(
   playerCandidates: readonly [string, string, string, string],
   side: Side,
   log: Logger,
+  inGameNames: InGameNames | null,
 ): Promise<NonNullable<MatchCandidate>['alpha']['picks']> {
   const positions: PickPosition[] = [0, 1, 2, 3];
+
+  // 登録名 → ゲーム内名前（記載なければ登録名をそのまま使用）
+  const inGameCandidates = playerCandidates.map((name) => inGameNames?.[name] ?? name);
+  // ゲーム内名前 → 登録名 の逆引きマップ
+  const reverseMap = new Map(playerCandidates.map((name, i) => [inGameCandidates[i], name]));
 
   // フェーズ1: OCR スコアリング（逐次：ポジションごとに処理してイベントループを解放）
   const raw: RawEntry[] = [];
   for (const i of positions) {
     const nameRegion = scaleRegion(regions.names[i], width, height);
     const weaponRegion = scaleRegion(regions.weapons[i], width, height);
-    const [rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl] = await Promise.all([
-      matchPlayerName(screenshotPath, nameRegion, playerCandidates),
+    const [rankedInGame, rankedWeapons, nameImageDataUrl, weaponImageDataUrl] = await Promise.all([
+      // ゲーム内名前で OCR 照合
+      matchPlayerName(screenshotPath, nameRegion, inGameCandidates),
       matchWeapon(screenshotPath, weaponRegion, width, height),
       sharp(screenshotPath)
         .extract({ left: nameRegion.x, top: nameRegion.y, width: nameRegion.w, height: nameRegion.h })
@@ -131,6 +142,11 @@ async function ocrSide(
         .toBuffer()
         .then((buf) => `data:image/png;base64,${buf.toString('base64')}`),
     ]);
+    // ゲーム内名前の結果を登録名に逆変換
+    const rankedNames = rankedInGame.map((r) => ({
+      name: reverseMap.get(r.name) ?? r.name,
+      score: r.score,
+    }));
     raw.push({ rankedNames, rankedWeapons, nameImageDataUrl, weaponImageDataUrl });
   }
 
@@ -148,17 +164,18 @@ async function ocrSide(
     log.info(`[ocr] ${side} pos=${i}\n[player scores]\n${playerLines}\n[weapon top5]\n${weaponLines}`);
   }
 
-  // フェーズ2: 重複なし自動選択（逐次）
+  // フェーズ2: 重複なし自動選択（登録名ベースで行う）
   const selectedNames = assignUnique(raw.map((r) => r.rankedNames.map((s) => s.name)));
 
-  // フェーズ3: 比較画像生成（並列）
+  // フェーズ3: 比較画像生成 — OCR 照合対象はゲーム内名前なので、ゲーム内名前でレンダリング
+  const selectedInGameNames = selectedNames.map((name) => inGameNames?.[name] ?? name);
   const compareImages = await Promise.all(
-    selectedNames.map((name) =>
+    selectedInGameNames.map((name) =>
       name ? rasterizeTextDataUrl(name).then((v) => v ?? undefined) : Promise.resolve(undefined)
     )
   );
 
-  // フェーズ4: PickCandidate 組み立て
+  // フェーズ4: PickCandidate 組み立て（playerCandidates は登録名で表示）
   const picks = positions.map((i): PickCandidate => ({
     position: i,
     playerCandidates: raw[i].rankedNames.map((s) => s.name),

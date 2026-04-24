@@ -81,3 +81,31 @@
 .btn-edit:hover {
   color: var(--text);
 }
+
+.preview-ingame-row th,
+.preview-ingame-row td {
+  padding-top: 2px;
+  padding-bottom: 4px;
+}
+
+.preview-ingame-row {
+  border-top: none !important;
+}
+
+.preview-ingame-label {
+  font-size: 10px !important;
+  color: var(--text-muted) !important;
+  padding-left: 8px !important;
+}
+
+.field-value--readonly {
+  color: var(--text-muted);
+}
+
+.preview-alpha .field-value--ingame {
+  color: var(--accent-alpha);
+}
+
+.preview-bravo .field-value--ingame {
+  color: var(--accent-bravo);
+}
