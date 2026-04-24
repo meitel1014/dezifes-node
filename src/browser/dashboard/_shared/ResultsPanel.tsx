@@ -355,11 +355,14 @@ function CandidateEditor({
         </button>
       </div>
       {cand.annotatedFile && (
-        <img
-          className="results-annotated-img"
-          src={`/annotated-screenshots/${cand.annotatedFile}`}
-          alt="判定領域"
-        />
+        <details className="results-annotated-details">
+          <summary></summary>
+          <img
+            className="results-annotated-img"
+            src={`/annotated-screenshots/${cand.annotatedFile}`}
+            alt="判定領域"
+          />
+        </details>
       )}
     </div>
   );

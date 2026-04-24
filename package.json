@@ -43,11 +43,10 @@
         "width": 8
       },
       {
-        "name": "turf-war-results",
+        "name": "result",
         "title": "判定結果",
-        "file": "turf-war-results.html",
-        "workspace": "Battle",
-        "width": 8
+        "file": "result.html",
+        "fullbleed": true
       },
       {
         "name": "settings-csv-reload",
