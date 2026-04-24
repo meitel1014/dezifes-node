@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import type { NodeCG } from './nodecg';
 import { loadTeamsPoolFromCsv } from './loadTeams';
 import { loadWeaponAliasesFromCsv } from './weaponAliases';
+import { loadInGameNamesFromCsv } from './loadInGameNames';
 import { appendRecordCsv, appendRecordGoogleSheet } from './appendRecord';
 import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
@@ -40,6 +41,7 @@ export default (nodecg: NodeCG) => {
   const gasEndpointConfiguredRep = nodecg.Replicant('gasEndpointConfigured');
   const activeModeRep = nodecg.Replicant('activeMode');
   const stageNamesRep = nodecg.Replicant('stageNames');
+  const inGameNamesRep = nodecg.Replicant('inGameNames');
 
   const gasEndpointUrl = process.env['GAS_ENDPOINT_URL'];
   gasEndpointConfiguredRep.value = !!gasEndpointUrl;
@@ -63,6 +65,10 @@ export default (nodecg: NodeCG) => {
       `Loaded weapon aliases: ${Object.keys(weaponAliasesRep.value ?? {}).length} entries`
     );
   }
+
+  // ゲーム内名前対応表は常に CSV から初期化（編集後も再起動で CSV に戻す）。
+  inGameNamesRep.value = loadInGameNamesFromCsv();
+  log.info(`Loaded in-game names: ${Object.keys(inGameNamesRep.value ?? {}).length} entries`);
 
   const getScreenshotAbsDir = () =>
     path.resolve(process.cwd(), screenshotDirRep.value ?? 'data/screenshots');
@@ -152,6 +158,7 @@ export default (nodecg: NodeCG) => {
         teamsPool: pool,
         log,
         stageCandidate: latestStageCandidate[mode],
+        inGameNames: inGameNamesRep.value ?? null,
       }).then((cand) => {
         if (!cand) {
           log.warn(`[weapons] OCR skipped: ${filename} — アルファ/ブラボー チームが選択されていません`);
@@ -467,6 +474,18 @@ export default (nodecg: NodeCG) => {
     if (ack && !ack.handled) ack(null);
   });
 
+  nodecg.listenFor('reloadInGameNamesCsv', (_data, ack) => {
+    inGameNamesRep.value = loadInGameNamesFromCsv();
+    log.info(
+      `Reloaded in-game names: ${Object.keys(inGameNamesRep.value ?? {}).length} entries`
+    );
+    if (ack && !ack.handled) ack(null);
+  });
+
+  nodecg.listenFor('setInGameName', ({ playerName, inGameName }, ack) => {
+    inGameNamesRep.value = { ...(inGameNamesRep.value ?? {}), [playerName]: inGameName };
+    if (ack && !ack.handled) ack(null);
+  });
 
 };
 

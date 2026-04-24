@@ -1,21 +1,29 @@
 import { useState } from 'react';
 
-export function CsvReloadPanel() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+type Status = 'idle' | 'loading' | 'done' | 'error';
 
-  const handleReload = () => {
+function statusLabel(status: Status, idleLabel: string): string {
+  if (status === 'loading') return '読み込み中…';
+  if (status === 'done') return '完了';
+  if (status === 'error') return '読み込み失敗';
+  return idleLabel;
+}
+
+function useReloadButton(message: 'reloadTeamsCsv' | 'reloadInGameNamesCsv') {
+  const [status, setStatus] = useState<Status>('idle');
+  const handle = () => {
     setStatus('loading');
-    void nodecg.sendMessage('reloadTeamsCsv').then(
-      () => {
-        setStatus('done');
-        setTimeout(() => setStatus('idle'), 2000);
-      },
-      () => {
-        setStatus('error');
-        setTimeout(() => setStatus('idle'), 3000);
-      },
+    void nodecg.sendMessage(message).then(
+      () => { setStatus('done'); setTimeout(() => setStatus('idle'), 2000); },
+      () => { setStatus('error'); setTimeout(() => setStatus('idle'), 3000); },
     );
   };
+  return { status, handle };
+}
+
+export function CsvReloadPanel() {
+  const teams = useReloadButton('reloadTeamsCsv');
+  const inGame = useReloadButton('reloadInGameNamesCsv');
 
   return (
     <div className="csv-reload-panel">
@@ -25,17 +33,22 @@ export function CsvReloadPanel() {
         編集内容はすべて破棄されます。
       </p>
       <button
-        onClick={handleReload}
-        disabled={status === 'loading'}
+        onClick={teams.handle}
+        disabled={teams.status === 'loading'}
         className="btn btn-reload"
       >
-        {status === 'loading'
-          ? '読み込み中…'
-          : status === 'done'
-            ? '完了'
-            : status === 'error'
-              ? '読み込み失敗'
-              : 'CSV 再読込'}
+        {statusLabel(teams.status, 'CSV 再読込')}
+      </button>
+
+      <p style={{ marginTop: '16px' }}>
+        <code>data/in-game-name.csv</code> からゲーム内名前対応表を再読み込みします。
+      </p>
+      <button
+        onClick={inGame.handle}
+        disabled={inGame.status === 'loading'}
+        className="btn btn-reload"
+      >
+        {statusLabel(inGame.status, 'CSV 再読込')}
       </button>
     </div>
   );

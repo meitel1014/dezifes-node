@@ -51,4 +51,11 @@ export type MessageMap = {
   setMatchCandidateStageName: {
     data: { mode: Mode; candidateIndex: number; stageName: string };
   };
+
+  /** data/in-game-name.csv を再読込して inGameNames Replicant に反映 */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
+  reloadInGameNamesCsv: {};
+
+  /** 1 プレイヤーのゲーム内名前を設定（inGameNames Replicant を更新） */
+  setInGameName: { data: { playerName: string; inGameName: string } };
 };

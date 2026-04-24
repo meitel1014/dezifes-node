@@ -10,6 +10,7 @@ import type {
   GoogleSheetSync,
   GasEndpointConfigured,
   StageNames,
+  InGameNames,
 } from '../schemas';
 
 /**
@@ -27,4 +28,5 @@ export type ReplicantMap = {
   googleSheetSync: GoogleSheetSync;
   gasEndpointConfigured: GasEndpointConfigured;
   stageNames: StageNames;
+  inGameNames: InGameNames;
 };

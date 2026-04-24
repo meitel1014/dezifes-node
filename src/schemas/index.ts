@@ -33,3 +33,6 @@ export type { GoogleSheetSync, GasEndpointConfigured } from './googleSheetSync';
 
 export { stageNamesSchema } from './stageNames';
 export type { StageNames } from './stageNames';
+
+export { inGameNamesSchema } from './inGameNames';
+export type { InGameNames } from './inGameNames';

@@ -5,6 +5,7 @@ import { stripHtml } from '../../utils/stripHtml';
 import { Html } from '../../components/Html';
 import type { Mode, Side, PickPosition } from '@/nodecg/messages';
 import type {
+  InGameNames,
   Match,
   MatchCandidate,
   StageNames,
@@ -28,6 +29,7 @@ export function ResultsPanel({ mode }: Props) {
   const [aliases] = useReplicant('weaponAliases');
   const [selection] = useReplicant('selection');
   const [stageNames] = useReplicant('stageNames');
+  const [inGameNames] = useReplicant('inGameNames');
   const [showAllWeapons, setShowAllWeapons] = useState<Record<string, boolean>>({});
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -140,6 +142,7 @@ export function ResultsPanel({ mode }: Props) {
                   aliases={aliases}
                   teamsPool={teamsPool}
                   stageNames={stageNames}
+                  inGameNames={inGameNames}
                   showAllWeapons={showAllWeapons}
                   setShowAllWeapons={setShowAllWeapons}
                   fullWeaponList={fullWeaponList}
@@ -190,6 +193,7 @@ type EditorProps = {
   aliases: WeaponAliases | undefined;
   teamsPool: TeamsPool;
   stageNames: StageNames | undefined;
+  inGameNames: InGameNames | undefined;
   showAllWeapons: Record<string, boolean>;
   setShowAllWeapons: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   fullWeaponList: string[];
@@ -202,6 +206,7 @@ function CandidateEditor({
   aliases,
   teamsPool,
   stageNames,
+  inGameNames,
   showAllWeapons,
   setShowAllWeapons,
   fullWeaponList,
@@ -311,6 +316,11 @@ function CandidateEditor({
                         </option>
                       ))}
                     </select>
+                    {pick.selected.playerName ? (
+                      <span className="player-ingame-name">
+                        {(inGameNames ?? {})[pick.selected.playerName] ?? pick.selected.playerName}
+                      </span>
+                    ) : null}
                   </td>
                   <td>
                     {pick.weaponImageDataUrl && (
