@@ -75,10 +75,16 @@ export function ResultsPanel({ mode }: Props) {
     setIsUploading(true);
     setUploadError(null);
     try {
-      const res = await fetch(`/upload-screenshot?mode=${mode}`, {
+      const content = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch('/weapons', {
         method: 'POST',
-        headers: { 'Content-Type': 'image/png' },
-        body: file,
+        headers: { 'Content-Type': 'text/plain' },
+        body: content,
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({})) as { error?: string };
@@ -109,11 +115,7 @@ export function ResultsPanel({ mode }: Props) {
             <p>OCR 処理中…</p>
           ) : (
             <>
-              <p>
-                判定待機中… 両チームを表示状態にした上で、
-                <br />
-                試合開始画面 PNG が格納ディレクトリに保存されると候補がここに現れます。
-              </p>
+              <p>両チームを表示状態にした上で、試合開始画面の PNG をドロップしてください。</p>
               <p className="results-drop-hint">
                 {isDragging ? 'ここにドロップ' : 'または PNG をここにドロップ'}
               </p>
