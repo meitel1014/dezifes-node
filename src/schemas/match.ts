@@ -22,6 +22,7 @@ export const matchSchema = z.object({
   sourceFile: z.string(),
   alpha: sidePicksSchema,
   bravo: sidePicksSchema,
+  stageName: z.string().nullable().default(null),
 });
 
 export const matchesSchema = z.array(matchSchema).default([]);

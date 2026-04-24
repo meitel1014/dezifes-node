@@ -30,3 +30,6 @@ export type { ScreenshotDir } from './screenshotDir';
 
 export { googleSheetSyncSchema, gasEndpointConfiguredSchema } from './googleSheetSync';
 export type { GoogleSheetSync, GasEndpointConfigured } from './googleSheetSync';
+
+export { stageNamesSchema } from './stageNames';
+export type { StageNames } from './stageNames';

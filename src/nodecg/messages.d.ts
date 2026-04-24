@@ -46,4 +46,9 @@ export type MessageMap = {
   /** data/weapon_aliases.csv を再読込して weaponAliases Replicant に反映 */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
   reloadWeaponAliases: {};
+
+  /** 判定結果候補のステージ名を手動設定 */
+  setMatchCandidateStageName: {
+    data: { mode: Mode; candidateIndex: number; stageName: string };
+  };
 };

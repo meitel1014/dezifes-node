@@ -9,6 +9,7 @@ import type {
   ScreenshotDir,
   GoogleSheetSync,
   GasEndpointConfigured,
+  StageNames,
 } from '../schemas';
 
 /**
@@ -25,4 +26,5 @@ export type ReplicantMap = {
   screenshotDir: ScreenshotDir;
   googleSheetSync: GoogleSheetSync;
   gasEndpointConfigured: GasEndpointConfigured;
+  stageNames: StageNames;
 };

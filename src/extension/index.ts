@@ -2,12 +2,14 @@ import './env';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
+import sharp from 'sharp';
 import type { NodeCG } from './nodecg';
 import { loadTeamsPoolFromCsv } from './loadTeams';
 import { loadWeaponAliasesFromCsv } from './weaponAliases';
 import { appendRecordCsv, appendRecordGoogleSheet } from './appendRecord';
 import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
+import { loadStageTemplates, matchStage, getCachedStageNames } from './ocr/matchStage';
 import { processScreenshot } from './ocr/processScreenshot';
 import type { Match, PickCandidate } from '../schemas';
 import type { Mode } from '../nodecg/messages';
@@ -15,6 +17,13 @@ import type { Mode } from '../nodecg/messages';
 
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
 type ConfirmedPicks = Match['alpha']['picks'];
+
+type StageResult = { stageName: string; score: number; allScores: { stageName: string; score: number }[] };
+// /stage で受信した最新ステージ候補をモード別に一時保持（Replicantは不要）
+const latestStageCandidate: Record<Mode, StageResult | null> = {
+  turfWar: null,
+  splatZones: null,
+};
 
 export default (nodecg: NodeCG) => {
   const log = new nodecg.Logger('dezifes');
@@ -30,6 +39,7 @@ export default (nodecg: NodeCG) => {
   const googleSheetSyncRep = nodecg.Replicant('googleSheetSync');
   const gasEndpointConfiguredRep = nodecg.Replicant('gasEndpointConfigured');
   const activeModeRep = nodecg.Replicant('activeMode');
+  const stageNamesRep = nodecg.Replicant('stageNames');
 
   const gasEndpointUrl = process.env['GAS_ENDPOINT_URL'];
   gasEndpointConfiguredRep.value = !!gasEndpointUrl;
@@ -57,8 +67,7 @@ export default (nodecg: NodeCG) => {
   const getScreenshotAbsDir = () =>
     path.resolve(process.cwd(), screenshotDirRep.value ?? 'data/screenshots');
 
-  // NodeCG の HTTP listen 完了後にブキテンプレートを事前ロード。
-  // 初回 OCR 実行時の待ち時間を削減するため。
+  // NodeCG の HTTP listen 完了後にブキ・ステージテンプレートを事前ロード。
   setImmediate(() => {
     void loadWeaponTemplates(log.warn.bind(log)).then((t) => {
       if (t.length === 0) {
@@ -66,6 +75,19 @@ export default (nodecg: NodeCG) => {
       } else {
         log.info(`Weapon templates loaded: ${t.length}`);
       }
+    });
+
+    void Promise.all([
+      loadStageTemplates('turfWar', log.warn.bind(log)),
+      loadStageTemplates('splatZones', log.warn.bind(log)),
+    ]).then(() => {
+      stageNamesRep.value = {
+        turfWar: getCachedStageNames('turfWar'),
+        splatZones: getCachedStageNames('splatZones'),
+      };
+      log.info(
+        `Stage templates loaded: turfWar=${getCachedStageNames('turfWar').length}, splatZones=${getCachedStageNames('splatZones').length}`
+      );
     });
   });
 
@@ -119,7 +141,7 @@ export default (nodecg: NodeCG) => {
         return;
       }
 
-      res.status(202).json({ filename });
+      res.status(202).end();
 
       log.info(`[weapons] OCR start: ${filename} (mode=${mode})`);
       void processScreenshot({
@@ -129,6 +151,7 @@ export default (nodecg: NodeCG) => {
         selection,
         teamsPool: pool,
         log,
+        stageCandidate: latestStageCandidate[mode],
       }).then((cand) => {
         if (!cand) {
           log.warn(`[weapons] OCR skipped: ${filename} — アルファ/ブラボー チームが選択されていません`);
@@ -142,6 +165,64 @@ export default (nodecg: NodeCG) => {
 
     req.on('error', (e) => {
       log.error('[weapons] リクエストエラー', e);
+    });
+  });
+
+  // OBSから試合開始時のステージ画面を受け取りステージを自動判別するエンドポイント
+  // POST /stage  (body: <raw base64 PNG>, Content-Type: text/plain)
+  nodecg.mount('/stage', (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).end();
+      return;
+    }
+
+    const mode: Mode = activeModeRep.value ?? 'turfWar';
+    const filename = `stage-${Date.now()}.png`;
+
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => chunks.push(chunk));
+    req.on('end', () => {
+      const content = Buffer.concat(chunks).toString('utf8').trim();
+      if (!content) {
+        res.status(400).json({ error: 'empty body' });
+        return;
+      }
+
+      const pngBuffer = Buffer.from(content, 'base64');
+      const absDir = getScreenshotAbsDir();
+      try {
+        fs.writeFileSync(path.join(absDir, filename), pngBuffer);
+      } catch (e) {
+        log.error('[stage] ファイル保存失敗', e);
+        res.status(500).json({ error: 'write failed' });
+        return;
+      }
+
+      res.status(202).end();
+
+      log.info(`[stage] matching start: ${filename} (mode=${mode})`);
+      void (async () => {
+        try {
+          const meta = await sharp(path.join(absDir, filename)).metadata();
+          const w = meta.width ?? 1920;
+          const h = meta.height ?? 1080;
+          const ranked = await matchStage(path.join(absDir, filename), mode, w, h, log.warn.bind(log));
+          if (ranked.length > 0) {
+            latestStageCandidate[mode] = { stageName: ranked[0].stageName, score: ranked[0].score, allScores: ranked };
+            log.info(`[stage] best match: "${ranked[0].stageName}" score=${(ranked[0].score * 100).toFixed(1)}% (mode=${mode})`);
+          } else {
+            latestStageCandidate[mode] = null;
+            log.warn(`[stage] ステージテンプレートが見つかりません (mode=${mode})`);
+          }
+        } catch (e) {
+          log.error(`[stage] 失敗: ${filename}`, e);
+          latestStageCandidate[mode] = null;
+        }
+      })();
+    });
+
+    req.on('error', (e) => {
+      log.error('[stage] リクエストエラー', e);
     });
   });
 
@@ -166,6 +247,8 @@ export default (nodecg: NodeCG) => {
       res.status(400).json({ error: 'invalid result' });
       return;
     }
+
+    res.status(202).end();
 
     const wonSide = result === 'alpha_win' ? 'alpha' : 'bravo';
     const cands = matchCandidatesRep.value;
@@ -294,6 +377,7 @@ export default (nodecg: NodeCG) => {
       timestamp: new Date().toISOString(),
       mode,
       sourceFile: cand.sourceFile,
+      stageName: cand.stageName ?? null,
       alpha: {
         teamId: cand.alpha.teamId,
         picks: toConfirmedPicks(cand.alpha.picks),
@@ -358,6 +442,20 @@ export default (nodecg: NodeCG) => {
   nodecg.listenFor('deleteMatch', ({ id }, ack) => {
     const list = matchesRep.value ?? [];
     matchesRep.value = list.filter((m) => m.id !== id);
+    if (ack && !ack.handled) ack(null);
+  });
+
+  nodecg.listenFor('setMatchCandidateStageName', ({ mode, candidateIndex, stageName }, ack) => {
+    const cands = matchCandidatesRep.value;
+    const queue = cands?.[mode] ?? [];
+    if (!cands || !queue[candidateIndex]) {
+      if (ack && !ack.handled) ack(null);
+      return;
+    }
+    matchCandidatesRep.value = {
+      ...cands,
+      [mode]: queue.map((c, i) => (i === candidateIndex ? { ...c, stageName } : c)),
+    };
     if (ack && !ack.handled) ack(null);
   });
 
