@@ -127,14 +127,13 @@
 .results-annotated-details summary {
   cursor: pointer;
   font-size: 0.85em;
-  color: #eee;
+  color: var(--text);
   user-select: none;
   padding: 3px 8px;
   border-radius: 3px;
-  background: #444;
-  border: 1px solid #666;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   display: inline-block;
-  list-style: none;
 }
 
 .results-annotated-details summary::after {
@@ -147,7 +146,7 @@
 
 .results-annotated-img {
   width: 100%;
-  border: 1px solid #333;
+  border: 1px solid var(--border);
   border-radius: 4px;
   margin-top: 4px;
 }

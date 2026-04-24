@@ -356,11 +356,12 @@ function CandidateEditor({
       </div>
       {cand.annotatedFile && (
         <details className="results-annotated-details">
-          <summary></summary>
+          <summary aria-label="判定領域の表示切替"></summary>
           <img
             className="results-annotated-img"
             src={`/annotated-screenshots/${cand.annotatedFile}`}
             alt="判定領域"
+            loading="lazy"
           />
         </details>
       )}
