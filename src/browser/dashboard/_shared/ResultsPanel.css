@@ -151,6 +151,38 @@
   margin-top: 4px;
 }
 
+.results-stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.results-stage-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.results-stage-select {
+  padding: 4px 6px;
+  font-size: 12px;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.results-stage-score {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .results-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

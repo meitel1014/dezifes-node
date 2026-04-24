@@ -18,8 +18,9 @@ import type { Mode } from '../nodecg/messages';
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
 type ConfirmedPicks = Match['alpha']['picks'];
 
+type StageResult = { stageName: string; score: number; allScores: { stageName: string; score: number }[] };
 // /stage で受信した最新ステージ候補をモード別に一時保持（Replicantは不要）
-const latestStageCandidate: Record<Mode, { stageName: string; score: number } | null> = {
+const latestStageCandidate: Record<Mode, StageResult | null> = {
   turfWar: null,
   splatZones: null,
 };
@@ -140,7 +141,7 @@ export default (nodecg: NodeCG) => {
         return;
       }
 
-      res.status(202).json({ filename });
+      res.status(202).end();
 
       log.info(`[weapons] OCR start: ${filename} (mode=${mode})`);
       void processScreenshot({
@@ -197,7 +198,7 @@ export default (nodecg: NodeCG) => {
         return;
       }
 
-      res.status(202).json({ filename });
+      res.status(202).end();
 
       log.info(`[stage] matching start: ${filename} (mode=${mode})`);
       void (async () => {
@@ -207,7 +208,7 @@ export default (nodecg: NodeCG) => {
           const h = meta.height ?? 1080;
           const ranked = await matchStage(path.join(absDir, filename), mode, w, h, log.warn.bind(log));
           if (ranked.length > 0) {
-            latestStageCandidate[mode] = { stageName: ranked[0].stageName, score: ranked[0].score };
+            latestStageCandidate[mode] = { stageName: ranked[0].stageName, score: ranked[0].score, allScores: ranked };
             log.info(`[stage] best match: "${ranked[0].stageName}" score=${(ranked[0].score * 100).toFixed(1)}% (mode=${mode})`);
           } else {
             latestStageCandidate[mode] = null;
@@ -246,6 +247,8 @@ export default (nodecg: NodeCG) => {
       res.status(400).json({ error: 'invalid result' });
       return;
     }
+
+    res.status(202).end();
 
     const wonSide = result === 'alpha_win' ? 'alpha' : 'bravo';
     const cands = matchCandidatesRep.value;

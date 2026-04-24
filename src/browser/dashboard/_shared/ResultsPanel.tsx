@@ -374,11 +374,13 @@ function CandidateEditor({
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
-        {cand.stageScore !== null && (
-          <span className="results-stage-score">
-            {(cand.stageScore * 100).toFixed(1)}%
-          </span>
-        )}
+        {(() => {
+          const score = cand.stageScores.find((s) => s.stageName === cand.stageName)?.score
+            ?? (cand.stageName ? cand.stageScore : null);
+          return score !== null && score !== undefined ? (
+            <span className="results-stage-score">{(score * 100).toFixed(1)}%</span>
+          ) : null;
+        })()}
       </div>
       <div className="results-grid">
         {renderSide('alpha')}

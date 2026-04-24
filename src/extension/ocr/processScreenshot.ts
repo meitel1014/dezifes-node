@@ -32,7 +32,7 @@ type ProcessInput = {
   selection: Selection;
   teamsPool: TeamsPool;
   log: Logger;
-  stageCandidate?: { stageName: string; score: number } | null;
+  stageCandidate?: { stageName: string; score: number; allScores: { stageName: string; score: number }[] } | null;
 };
 
 /**
@@ -96,6 +96,7 @@ export async function processScreenshot(
     wonSide: null,
     stageName: input.stageCandidate?.stageName ?? null,
     stageScore: input.stageCandidate?.score ?? null,
+    stageScores: input.stageCandidate?.allScores ?? [],
   };
 }
 
