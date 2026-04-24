@@ -119,12 +119,36 @@
   image-rendering: pixelated;
 }
 
-.results-annotated-img {
-  width: 100%;
-  border: 1px solid #333;
-  border-radius: 4px;
+.results-annotated-details {
   margin-top: 6px;
   margin-bottom: 8px;
+}
+
+.results-annotated-details summary {
+  cursor: pointer;
+  font-size: 0.85em;
+  color: var(--text);
+  user-select: none;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+
+.results-annotated-details summary::after {
+  content: '▶ 判定領域を表示';
+}
+
+.results-annotated-details[open] summary::after {
+  content: '▼ 判定領域を非表示';
+}
+
+.results-annotated-img {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-top: 4px;
 }
 
 .results-grid {
