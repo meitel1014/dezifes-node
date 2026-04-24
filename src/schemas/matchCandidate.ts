@@ -36,6 +36,8 @@ const matchCandidateSchema = z.object({
   alpha: sideCandidateSchema,
   bravo: sideCandidateSchema,
   wonSide: z.enum(['alpha', 'bravo']).nullable().default(null),
+  stageName: z.string().nullable().default(null),
+  stageScore: z.number().nullable().default(null),
 });
 
 export const matchCandidatesSchema = z

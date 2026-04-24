@@ -7,6 +7,7 @@ import type { Mode, Side, PickPosition } from '@/nodecg/messages';
 import type {
   Match,
   MatchCandidate,
+  StageNames,
   TeamsPool,
   WeaponAliases,
 } from '@/schemas';
@@ -26,6 +27,7 @@ export function ResultsPanel({ mode }: Props) {
   const [matches] = useReplicant('matches');
   const [aliases] = useReplicant('weaponAliases');
   const [selection] = useReplicant('selection');
+  const [stageNames] = useReplicant('stageNames');
   const [showAllWeapons, setShowAllWeapons] = useState<Record<string, boolean>>({});
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -137,6 +139,7 @@ export function ResultsPanel({ mode }: Props) {
                   cand={cand}
                   aliases={aliases}
                   teamsPool={teamsPool}
+                  stageNames={stageNames}
                   showAllWeapons={showAllWeapons}
                   setShowAllWeapons={setShowAllWeapons}
                   fullWeaponList={fullWeaponList}
@@ -186,6 +189,7 @@ type EditorProps = {
   cand: MatchCandidate;
   aliases: WeaponAliases | undefined;
   teamsPool: TeamsPool;
+  stageNames: StageNames | undefined;
   showAllWeapons: Record<string, boolean>;
   setShowAllWeapons: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   fullWeaponList: string[];
@@ -197,6 +201,7 @@ function CandidateEditor({
   cand,
   aliases,
   teamsPool,
+  stageNames,
   showAllWeapons,
   setShowAllWeapons,
   fullWeaponList,
@@ -205,6 +210,10 @@ function CandidateEditor({
   const bravoTeam = teamsPool[mode].find((t) => t.id === cand.bravo.teamId) ?? null;
 
   const handleConfirm = () => {
+    if (!cand.stageName) {
+      alert('ステージを選択してください');
+      return;
+    }
     if (!cand.wonSide) {
       alert('勝利チームを選択してください');
       return;
@@ -236,6 +245,9 @@ function CandidateEditor({
       position,
       patch: { playerName },
     });
+  };
+  const handleStageChange = (stageName: string) => {
+    void nodecg.sendMessage('setMatchCandidateStageName', { mode, candidateIndex, stageName });
   };
   const handleWeaponChange = (side: Side, position: PickPosition, weaponId: string) => {
     void nodecg.sendMessage('updateMatchCandidate', {
@@ -349,6 +361,24 @@ function CandidateEditor({
     <div className="results-editor">
       <div className="results-source">
         元: <code>{cand.sourceFile}</code>（{new Date(cand.createdAt).toLocaleTimeString()}）
+      </div>
+      <div className="results-stage">
+        <label className="results-stage-label">ステージ</label>
+        <select
+          className="results-stage-select"
+          value={cand.stageName ?? ''}
+          onChange={(e) => handleStageChange(e.target.value)}
+        >
+          <option value="">(未設定)</option>
+          {(stageNames?.[mode] ?? []).map((name) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
+        {cand.stageScore !== null && (
+          <span className="results-stage-score">
+            {(cand.stageScore * 100).toFixed(1)}%
+          </span>
+        )}
       </div>
       <div className="results-grid">
         {renderSide('alpha')}
