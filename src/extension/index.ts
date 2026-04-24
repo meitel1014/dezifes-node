@@ -5,8 +5,7 @@ import fs from 'node:fs';
 import type { NodeCG } from './nodecg';
 import { loadTeamsPoolFromCsv } from './loadTeams';
 import { loadWeaponAliasesFromCsv } from './weaponAliases';
-import { appendWeaponCsv, appendWeaponGoogleSheet } from './appendWeapon';
-import { appendResultCsv, appendResultGoogleSheet } from './appendResult';
+import { appendRecordCsv, appendRecordGoogleSheet } from './appendRecord';
 import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
 import { processScreenshot } from './ocr/processScreenshot';
@@ -148,6 +147,7 @@ export default (nodecg: NodeCG) => {
 
   // OBSから勝利メッセージを受信するエンドポイント
   // POST /result  (body: result: alpha_win or bravo_win (application/json))
+  // 受信した勝利サイドを現在モードの先頭候補に反映する（CSV/GAS送信は「確定して記録」で行う）
   nodecg.mount('/result', (req, res) => {
     if (req.method !== 'POST') {
       res.status(405).end();
@@ -155,32 +155,32 @@ export default (nodecg: NodeCG) => {
     }
 
     const mode = activeModeRep.value;
-    const selection = selectionRep.value;
-    if (!mode || !selection) {
+    if (!mode) {
       res.status(503).json({ error: 'replicants not ready' });
       return;
     }
 
     const result: string = req.body.result;
-    console.log(result);
     if (!['alpha_win', 'bravo_win'].includes(result)) {
       log.error('[result] 試合結果受信エラー:' + result);
       res.status(400).json({ error: 'invalid result' });
       return;
     }
 
-    try {
-      appendResultCsv(selection, mode, result);
-      log.info(`Result confirmed: ${result} -> data/results.csv`);
-    } catch (e) {
-      log.error('Failed to append results.csv', e);
+    const wonSide = result === 'alpha_win' ? 'alpha' : 'bravo';
+    const cands = matchCandidatesRep.value;
+    const queue = cands?.[mode] ?? [];
+    if (queue.length > 0 && cands) {
+      const updated = { ...queue[0], wonSide } as typeof queue[0];
+      matchCandidatesRep.value = {
+        ...cands,
+        [mode]: [updated, ...queue.slice(1)],
+      };
+      log.info(`[result] wonSide set to '${wonSide}' on ${mode}[0]`);
+    } else {
+      log.info(`[result] received '${result}' but no candidates in ${mode} queue`);
     }
 
-    if (googleSheetSyncRep.value && gasEndpointUrl) {
-      appendResultGoogleSheet(selection, mode, result, gasEndpointUrl)
-        .then(() => log.info(`Result synced to Google Sheet: ${result}`))
-        .catch((e) => log.error('Failed to append to Google Sheet', e));
-    }
     res.status(200).end();
   });
 
@@ -283,6 +283,12 @@ export default (nodecg: NodeCG) => {
       return;
     }
 
+    if (!cand.wonSide) {
+      if (ack && !ack.handled) ack(new Error('勝利チームが未選択です'));
+      return;
+    }
+    const wonSide = cand.wonSide;
+
     const match: Match = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -305,18 +311,33 @@ export default (nodecg: NodeCG) => {
     };
 
     try {
-      appendWeaponCsv(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null);
-      log.info(`Match confirmed: ${match.id} (${mode}) -> data/matches.csv`);
+      appendRecordCsv(match, wonSide, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null);
+      log.info(`Match confirmed: ${match.id} (${mode}, ${wonSide}) -> data/records.csv`);
     } catch (e) {
-      log.error('Failed to append matches.csv', e);
+      log.error('Failed to append records.csv', e);
     }
 
     if (googleSheetSyncRep.value && gasEndpointUrl) {
-      appendWeaponGoogleSheet(match, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null, gasEndpointUrl)
+      appendRecordGoogleSheet(match, wonSide, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null, gasEndpointUrl)
         .then(() => log.info(`Match synced to Google Sheet: ${match.id}`))
-        .catch((e) => log.error('Failed to append to Google Sheet', e));
+        .catch((e: unknown) => log.error('Failed to append to Google Sheet', e));
     }
 
+    if (ack && !ack.handled) ack(null);
+  });
+
+  nodecg.listenFor('setMatchCandidateWonSide', ({ mode, candidateIndex, wonSide }, ack) => {
+    const cands = matchCandidatesRep.value;
+    const queue = cands?.[mode] ?? [];
+    const cand = queue[candidateIndex];
+    if (!cands || !cand) {
+      if (ack && !ack.handled) ack(null);
+      return;
+    }
+    matchCandidatesRep.value = {
+      ...cands,
+      [mode]: queue.map((c, i) => (i === candidateIndex ? { ...c, wonSide } : c)),
+    };
     if (ack && !ack.handled) ack(null);
   });
 
