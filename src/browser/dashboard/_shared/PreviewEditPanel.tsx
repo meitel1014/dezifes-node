@@ -52,7 +52,7 @@ export function PreviewEditPanel({ mode }: Props) {
   const bravoTeam = findTeam(slot.bravo);
 
   // ── チーム情報（alias / name）の編集 ──
-  const startEdit = (side: 'alpha' | 'bravo', field: EditTarget['field'], team: Team) => {
+  const startEdit = (side: Side, field: EditTarget['field'], team: Team) => {
     setEditInGame(null);
     setEditTarget({ side, field, value: getFieldValue(team, field) });
   };
@@ -92,7 +92,7 @@ export function PreviewEditPanel({ mode }: Props) {
     if (e.key === 'Escape') cancelInGameEdit();
   };
 
-  const renderTeamPreview = (side: 'alpha' | 'bravo', team: Team | null) => {
+  const renderTeamPreview = (side: Side, team: Team | null) => {
     if (!team) {
       return (
         <div className={`preview-column preview-${side}`}>

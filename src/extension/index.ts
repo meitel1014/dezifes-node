@@ -14,7 +14,7 @@ import { loadStageTemplates, matchStage, getCachedStageNames } from './ocr/match
 import { processScreenshot } from './ocr/processScreenshot';
 import type { StageResult } from './ocr/processScreenshot';
 import type { Match, PickCandidate } from '../schemas';
-import type { Mode } from '../nodecg/messages';
+import type { Mode, Side } from '../nodecg/messages';
 
 
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
@@ -516,7 +516,7 @@ export default (nodecg: NodeCG) => {
       isManual: true,
       alpha: { teamId: alphaId ?? '', picks: teamPicks(alphaId) },
       bravo: { teamId: bravoId ?? '', picks: teamPicks(bravoId) },
-      wonSide: null as 'alpha' | 'bravo' | null,
+      wonSide: null as Side | null,
       stageName: null as string | null,
       stageScore: null as number | null,
       stageScores: [] as { stageName: string; score: number }[],

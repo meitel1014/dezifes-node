@@ -1,6 +1,6 @@
 import './ButtonsPanel.css';
 import { useReplicant } from '../../hooks/useReplicant';
-import type { Mode } from '@/nodecg/messages';
+import type { Mode, Side } from '@/nodecg/messages';
 
 type Props = { mode: Mode };
 
@@ -9,7 +9,7 @@ export function ButtonsPanel({ mode }: Props) {
 
   const vis = visibility?.[mode];
 
-  const handleToggle = (side: 'alpha' | 'bravo') => {
+  const handleToggle = (side: Side) => {
     if (!visibility) return;
     setVisibility({
       ...visibility,
