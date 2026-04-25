@@ -272,8 +272,16 @@ function CandidateEditor({
     return (
       <div className={`results-column results-${side}`}>
         <h3>
-          {side === 'alpha' ? 'アルファ' : 'ブラボー'} |{' '}
-          <Html value={team?.id ?? '(未選択)'} />
+          <span>
+            {side === 'alpha' ? 'アルファ' : 'ブラボー'} |{' '}
+            <Html value={team?.id ?? '(未選択)'} />
+          </span>
+          <button
+            className={`btn-sm btn-winner btn-winner--${side}${cand.wonSide === side ? ' btn-winner--selected' : ''}`}
+            onClick={() => handleWonSideChange(side)}
+          >
+            勝利
+          </button>
         </h3>
         <table className="results-table">
           <thead>
@@ -395,21 +403,6 @@ function CandidateEditor({
       <div className="results-grid">
         {renderSide('alpha')}
         {renderSide('bravo')}
-      </div>
-      <div className="results-winner">
-        <span className="results-winner-label">勝利チーム</span>
-        <button
-          className={`btn btn-winner btn-winner--alpha${cand.wonSide === 'alpha' ? ' btn-winner--selected' : ''}`}
-          onClick={() => handleWonSideChange('alpha')}
-        >
-          アルファ：<Html value={alphaTeam?.name ?? cand.alpha.teamId} />
-        </button>
-        <button
-          className={`btn btn-winner btn-winner--bravo${cand.wonSide === 'bravo' ? ' btn-winner--selected' : ''}`}
-          onClick={() => handleWonSideChange('bravo')}
-        >
-          ブラボー：<Html value={bravoTeam?.name ?? cand.bravo.teamId} />
-        </button>
       </div>
       <div className="results-actions">
         <button className="btn btn-confirm" onClick={handleConfirm}>

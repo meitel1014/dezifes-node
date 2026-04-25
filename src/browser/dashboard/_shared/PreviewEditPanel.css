@@ -5,7 +5,7 @@
 }
 
 .preview-column h3 {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -38,7 +38,7 @@
 
 .preview-table th {
   text-align: left;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
   padding: 6px 8px 6px 0;
@@ -93,7 +93,7 @@
 }
 
 .preview-ingame-label {
-  font-size: 10px !important;
+  font-size: 12px !important;
   color: var(--text-muted) !important;
   padding-left: 8px !important;
 }

@@ -11,7 +11,7 @@
   background: color-mix(in srgb, var(--bg-surface) 60%, transparent);
   text-align: center;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.6;
 }
 
@@ -21,13 +21,13 @@
 }
 
 .results-drop-hint {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-top: 8px;
 }
 
 .results-drop-error {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--accent-danger);
   margin-top: 4px;
 }
@@ -46,7 +46,7 @@
 }
 
 .results-queue-badge {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 6px;
 }
@@ -56,7 +56,7 @@
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
   cursor: default;
 }
@@ -71,7 +71,7 @@
   gap: 10px;
   justify-content: center;
   margin-top: 10px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tag {
@@ -91,13 +91,13 @@
 }
 
 .results-source {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-muted);
 }
 
 .results-source code {
   font-family: "Consolas", "SF Mono", monospace;
-  font-size: 11px;
+  font-size: 13px;
   background: var(--bg-input);
   padding: 1px 6px;
   border-radius: 3px;
@@ -155,11 +155,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .results-stage-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   letter-spacing: 0.04em;
@@ -169,7 +169,7 @@
 
 .results-stage-select {
   padding: 4px 6px;
-  font-size: 12px;
+  font-size: 14px;
   background: var(--bg-input);
   color: var(--text);
   border: 1px solid var(--border);
@@ -178,7 +178,7 @@
 }
 
 .results-stage-score {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -190,8 +190,11 @@
 }
 
 .results-column h3 {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding-bottom: 6px;
   margin-bottom: 6px;
   border-bottom: 2px solid var(--border);
@@ -210,12 +213,12 @@
 .results-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .results-table thead th {
   text-align: left;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   padding: 4px 6px 4px 0;
@@ -239,7 +242,7 @@
 .results-table select {
   width: 75%;
   padding: 4px 6px;
-  font-size: 12px;
+  font-size: 14px;
   background: var(--bg-input);
   color: var(--text);
   border: 1px solid var(--border);
@@ -249,7 +252,7 @@
 
 .player-ingame-name {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 2px;
 }
 
@@ -265,7 +268,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 2px;
   margin-left: 10px;
@@ -275,27 +278,9 @@
   margin: 0;
 }
 
-.results-winner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.results-winner-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
 button.btn-winner {
-  flex: 1;
-  font-size: 12px;
-  padding: 5px 8px;
+  font-size: 16px;
+  padding: 4px 20px;
   border-color: var(--border);
   color: var(--text-muted);
   background: transparent;
@@ -349,7 +334,7 @@ button.btn-dismiss:hover {
 }
 
 .results-history h4 {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -359,7 +344,7 @@ button.btn-dismiss:hover {
 
 .results-empty-sm {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 14px;
   font-style: italic;
 }
 
@@ -387,7 +372,7 @@ button.btn-dismiss:hover {
   background: var(--bg-surface);
   border: 0;
   color: var(--text);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   text-align: left;
 }
@@ -396,7 +381,7 @@ button.btn-dismiss:hover {
 .history-time { color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .history-teams { overflow: hidden; text-overflow: ellipsis; }
 .vs { color: var(--text-muted); margin: 0 4px; }
-.history-toggle { color: var(--text-muted); font-size: 10px; }
+.history-toggle { color: var(--text-muted); font-size: 12px; }
 
 .history-detail {
   display: grid;
@@ -404,7 +389,7 @@ button.btn-dismiss:hover {
   gap: 12px;
   padding: 8px 10px;
   background: var(--bg-input);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .history-detail > button {
@@ -413,7 +398,7 @@ button.btn-dismiss:hover {
 }
 
 .history-side h5 {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-muted);
   margin: 0 0 4px 0;
