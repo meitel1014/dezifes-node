@@ -164,7 +164,9 @@ export default (nodecg: NodeCG) => {
           return;
         }
         const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };
-        matchCandidatesRep.value = pushToQueue(cur, mode, cand);
+        // 手動入力候補を OCR 結果で置き換える
+        const withoutManual = { ...cur, [mode]: cur[mode].filter((c) => !c.isManual) };
+        matchCandidatesRep.value = pushToQueue(withoutManual, mode, cand);
         log.info(`[weapons] OCR done: ${filename} (mode=${mode})`);
       }).catch((e) => log.error(`[weapons] OCR 失敗: ${filename}`, e));
     });
@@ -483,6 +485,41 @@ export default (nodecg: NodeCG) => {
 
   nodecg.listenFor('setInGameName', ({ playerName, inGameName }, ack) => {
     inGameNamesRep.value = { ...(inGameNamesRep.value ?? {}), [playerName]: inGameName };
+    if (ack && !ack.handled) ack(null);
+  });
+
+  nodecg.listenFor('addManualCandidate', ({ mode }, ack) => {
+    const selection = selectionRep.value;
+    const pool = teamsPoolRep.value;
+    if (!selection) {
+      if (ack && !ack.handled) ack(new Error('replicants not ready'));
+      return;
+    }
+    const teamPicks = (teamId: string | null): PicksTuple => {
+      const team = pool?.[mode].find((t) => t.id === teamId);
+      const makePick = (position: 0 | 1 | 2 | 3): PickCandidate => ({
+        position,
+        playerCandidates: [],
+        weaponCandidates: [],
+        selected: { playerName: team?.players[position] ?? '', weaponId: '' },
+      });
+      return [makePick(0), makePick(1), makePick(2), makePick(3)];
+    };
+    const alphaId = selection[mode].alpha;
+    const bravoId = selection[mode].bravo;
+    const candidate = {
+      sourceFile: '(手動入力)',
+      createdAt: new Date().toISOString(),
+      isManual: true,
+      alpha: { teamId: alphaId ?? '', picks: teamPicks(alphaId) },
+      bravo: { teamId: bravoId ?? '', picks: teamPicks(bravoId) },
+      wonSide: null as 'alpha' | 'bravo' | null,
+      stageName: null as string | null,
+      stageScore: null as number | null,
+      stageScores: [] as { stageName: string; score: number }[],
+    };
+    const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };
+    matchCandidatesRep.value = pushToQueue(cur, mode, candidate);
     if (ack && !ack.handled) ack(null);
   });
 

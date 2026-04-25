@@ -124,6 +124,12 @@ export function ResultsPanel({ mode }: Props) {
                 {isDragging ? 'ここにドロップ' : '送信されなかった場合、 PNG をここにドロップ'}
               </p>
               {uploadError && <p className="results-drop-error">{uploadError}</p>}
+              <button
+                className="btn btn-manual"
+                onClick={() => void nodecg.sendMessage('addManualCandidate', { mode })}
+              >
+                手動で入力
+              </button>
             </>
           )}
         </div>
@@ -295,7 +301,7 @@ function CandidateEditor({
             {sideCand.picks.map((pick) => {
               const key = `${candidateIndex}-${side}-${pick.position}`;
               const showAll = showAllWeapons[key] ?? false;
-              const weaponOptions = showAll && fullWeaponList.length > 0
+              const weaponOptions = (showAll || pick.weaponCandidates.length === 0) && fullWeaponList.length > 0
                 ? fullWeaponList
                 : pick.weaponCandidates.slice(0, TOP_N_WEAPONS);
 
@@ -324,7 +330,7 @@ function CandidateEditor({
                         </option>
                       ))}
                     </select>
-                    {pick.selected.playerName ? (
+                    {pick.selected.playerName && !cand.isManual ? (
                       <span className="player-ingame-name">
                         {(inGameNames ?? {})[pick.selected.playerName] ?? pick.selected.playerName}
                       </span>
@@ -340,6 +346,7 @@ function CandidateEditor({
                         handleWeaponChange(side, pick.position, e.target.value)
                       }
                     >
+                      {cand.isManual && <option value="">(未選択)</option>}
                       {pick.selected.weaponId &&
                       !weaponOptions.includes(pick.selected.weaponId) ? (
                         <option value={pick.selected.weaponId}>
@@ -352,19 +359,21 @@ function CandidateEditor({
                         </option>
                       ))}
                     </select>
-                    <label className="weapon-toggle">
-                      <input
-                        type="checkbox"
-                        checked={showAll}
-                        onChange={() =>
-                          setShowAllWeapons((prev) => ({
-                            ...prev,
-                            [key]: !prev[key],
-                          }))
-                        }
-                      />
-                      すべて
-                    </label>
+                    {!cand.isManual && (
+                      <label className="weapon-toggle">
+                        <input
+                          type="checkbox"
+                          checked={showAll}
+                          onChange={() =>
+                            setShowAllWeapons((prev) => ({
+                              ...prev,
+                              [key]: !prev[key],
+                            }))
+                          }
+                        />
+                        すべて
+                      </label>
+                    )}
                   </td>
                 </tr>
               );
@@ -378,7 +387,10 @@ function CandidateEditor({
   return (
     <div className="results-editor">
       <div className="results-source">
-        元: <code>{cand.sourceFile}</code>（{new Date(cand.createdAt).toLocaleTimeString()}）
+        {cand.isManual
+          ? '手動入力'
+          : <>元: <code>{cand.sourceFile}</code>（{new Date(cand.createdAt).toLocaleTimeString()}）</>
+        }
       </div>
       <div className="results-stage">
         <label className="results-stage-label">ステージ</label>
