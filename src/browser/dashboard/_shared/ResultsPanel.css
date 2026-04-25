@@ -192,6 +192,9 @@
 .results-column h3 {
   font-size: 16px;
   font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding-bottom: 6px;
   margin-bottom: 6px;
   border-bottom: 2px solid var(--border);
@@ -275,27 +278,9 @@
   margin: 0;
 }
 
-.results-winner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.results-winner-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
 button.btn-winner {
-  flex: 1;
-  font-size: 14px;
-  padding: 5px 8px;
+  font-size: 16px;
+  padding: 4px 20px;
   border-color: var(--border);
   color: var(--text-muted);
   background: transparent;
