@@ -119,9 +119,9 @@ export function ResultsPanel({ mode }: Props) {
             <p>OCR 処理中…</p>
           ) : (
             <>
-              <p>両チームを表示状態にした上で、試合開始画面の PNG をドロップしてください。</p>
+              <p>両チームが表示状態の時、試合開始時自動的にマップ画面を読み取ります。</p>
               <p className="results-drop-hint">
-                {isDragging ? 'ここにドロップ' : 'または PNG をここにドロップ'}
+                {isDragging ? 'ここにドロップ' : '送信されなかった場合、 PNG をここにドロップ'}
               </p>
               {uploadError && <p className="results-drop-error">{uploadError}</p>}
             </>
