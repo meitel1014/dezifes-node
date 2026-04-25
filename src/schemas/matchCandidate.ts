@@ -33,6 +33,7 @@ const matchCandidateSchema = z.object({
   sourceFile: z.string(),
   annotatedFile: z.string().optional(),
   createdAt: z.string(),
+  isManual: z.boolean().default(false),
   alpha: sideCandidateSchema,
   bravo: sideCandidateSchema,
   wonSide: z.enum(['alpha', 'bravo']).nullable().default(null),

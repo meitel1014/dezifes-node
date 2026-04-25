@@ -95,6 +95,7 @@ export async function processScreenshot(
     sourceFile,
     annotatedFile,
     createdAt: new Date().toISOString(),
+    isManual: false,
     alpha: { teamId: alphaTeam.id, picks: alphaPicks },
     bravo: { teamId: bravoTeam.id, picks: bravoPicks },
     wonSide: null,

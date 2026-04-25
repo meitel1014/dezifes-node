@@ -56,6 +56,9 @@ export type MessageMap = {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- データなし
   reloadInGameNamesCsv: {};
 
+  /** 手動入力用の空の候補をキューに追加する */
+  addManualCandidate: { data: { mode: Mode } };
+
   /** 1 プレイヤーのゲーム内名前を設定（inGameNames Replicant を更新） */
   setInGameName: { data: { playerName: string; inGameName: string } };
 };

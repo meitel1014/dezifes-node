@@ -4,6 +4,15 @@
   gap: 16px;
 }
 
+.results-empty,
+.results-queue-item,
+.results-drop-compact,
+.results-history {
+  width: min(1200px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .results-empty {
   padding: 20px;
   border: 1px dashed var(--border);
@@ -310,6 +319,17 @@ button.btn-winner--bravo.btn-winner--selected {
 .results-actions {
   display: flex;
   gap: 8px;
+}
+
+button.btn-manual {
+  border-color: var(--border);
+  color: var(--text-muted);
+  background: transparent;
+  margin-top: 10px;
+}
+button.btn-manual:hover {
+  border-color: var(--text);
+  color: var(--text);
 }
 
 button.btn-confirm {
