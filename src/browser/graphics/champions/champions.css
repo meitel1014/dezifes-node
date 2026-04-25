@@ -1,0 +1,60 @@
+.champ-container {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  font-family: 'チェックポイント★リベンジ', sans-serif;
+  color: #ffffff;
+}
+
+/* 左上: チーム名ブロック */
+.champ-team-names {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+}
+
+/* チーム名1行ぶんのラッパー（上下中央揃え・2行改行に対応） */
+.champ-team-name-wrapper {
+  display: flex;
+  align-items: center;
+  width: 600px;
+  min-height: 54px;
+}
+
+/* FitText のルート div */
+.champ-team-name {
+  font-size: 27px;
+  width: 100%;
+  line-height: 1.2;
+}
+
+/* 左下: アルファプレイヤー */
+.champ-alpha-players {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+/* 右下: ブラボープレイヤー */
+.champ-bravo-players {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.champ-player {
+  font-size: 27px;
+  line-height: 1.2;
+}
+
+.champ-bravo-players .champ-player {
+  text-align: right;
+}

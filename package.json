@@ -80,6 +80,11 @@
         "file": "side.html",
         "width": 1920,
         "height": 1080
+      },
+      {
+        "file": "champions.html",
+        "width": 1920,
+        "height": 1080
       }
     ]
   },
