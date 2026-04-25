@@ -6,7 +6,6 @@ import type {
   Matches,
   MatchCandidates,
   WeaponAliases,
-  ScreenshotDir,
   GoogleSheetSync,
   GasEndpointConfigured,
   StageNames,
@@ -24,7 +23,6 @@ export type ReplicantMap = {
   matches: Matches;
   matchCandidates: MatchCandidates;
   weaponAliases: WeaponAliases;
-  screenshotDir: ScreenshotDir;
   googleSheetSync: GoogleSheetSync;
   gasEndpointConfigured: GasEndpointConfigured;
   stageNames: StageNames;

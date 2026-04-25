@@ -63,13 +63,6 @@
         "width": 4
       },
       {
-        "name": "settings-screenshot-dir",
-        "title": "設定｜スクショ格納ディレクトリ",
-        "file": "settings-screenshot-dir.html",
-        "workspace": "設定",
-        "width": 4
-      },
-      {
         "name": "settings-google-sheet",
         "title": "設定｜Google スプレッドシート同期",
         "file": "settings-google-sheet.html",

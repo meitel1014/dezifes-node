@@ -37,7 +37,7 @@ export function CsvReloadPanel() {
         disabled={teams.status === 'loading'}
         className="btn btn-reload"
       >
-        {statusLabel(teams.status, 'CSV 再読込')}
+        {statusLabel(teams.status, 'チーム情報CSV再読込')}
       </button>
 
       <p style={{ marginTop: '16px' }}>
@@ -48,7 +48,7 @@ export function CsvReloadPanel() {
         disabled={inGame.status === 'loading'}
         className="btn btn-reload"
       >
-        {statusLabel(inGame.status, 'CSV 再読込')}
+        {statusLabel(inGame.status, 'ゲーム内表記CSV再読込')}
       </button>
     </div>
   );

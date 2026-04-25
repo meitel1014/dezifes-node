@@ -36,7 +36,6 @@ export default (nodecg: NodeCG) => {
   const matchesRep = nodecg.Replicant('matches');
   const matchCandidatesRep = nodecg.Replicant('matchCandidates');
   const weaponAliasesRep = nodecg.Replicant('weaponAliases');
-  const screenshotDirRep = nodecg.Replicant('screenshotDir');
   const googleSheetSyncRep = nodecg.Replicant('googleSheetSync');
   const gasEndpointConfiguredRep = nodecg.Replicant('gasEndpointConfigured');
   const activeModeRep = nodecg.Replicant('activeMode');
@@ -71,7 +70,7 @@ export default (nodecg: NodeCG) => {
   log.info(`Loaded in-game names: ${Object.keys(inGameNamesRep.value ?? {}).length} entries`);
 
   const getScreenshotAbsDir = () =>
-    path.resolve(process.cwd(), screenshotDirRep.value ?? 'data/screenshots');
+    path.resolve(process.cwd(), 'data/screenshots');
 
   // NodeCG の HTTP listen 完了後にブキ・ステージテンプレートを事前ロード。
   setImmediate(() => {
