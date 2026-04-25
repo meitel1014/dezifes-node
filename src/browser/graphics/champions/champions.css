@@ -52,12 +52,12 @@
 /* 右下: ブラボープレイヤー */
 .champ-bravo-players {
   position: absolute;
-  bottom: 16px;
+  bottom: 15px;
   right: 50px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 18px;
+  gap: 17px;
 }
 
 .champ-player {
