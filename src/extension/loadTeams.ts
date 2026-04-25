@@ -11,12 +11,12 @@ const CSV_PATH = path.resolve(process.cwd(), 'data/teams.csv');
  * 列順が変わっても追従できるように名前ベースで引く。
  */
 const HEADERS = {
-  mode: 'どちらのイベントに出場しますか',
+  mode: 'ルール',
   name: 'チーム名',
-  player1: 'プレイヤー1',
-  player2: 'プレイヤー2',
-  player3: 'プレイヤー3',
-  player4: 'プレイヤー4',
+  player1: 'メンバー1の名前',
+  player2: 'メンバー2の名前',
+  player3: 'メンバー3の名前',
+  player4: 'メンバー4の名前',
   alias: '二つ名',
 } as const;
 
