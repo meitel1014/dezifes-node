@@ -30,6 +30,7 @@ db
 /graphics
 /shared
 /schemas
+/cfg/nodecg.json
 
 # Temporary files
 .temp
