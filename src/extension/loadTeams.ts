@@ -18,6 +18,7 @@ const HEADERS = {
   player3: 'メンバー3の名前',
   player4: 'メンバー4の名前',
   alias: '二つ名',
+  displayName: 'チーム名(表示用)',
 } as const;
 
 const MODE_LABEL_TO_KEY: Record<string, 'turfWar' | 'splatZones'> = {
@@ -55,6 +56,7 @@ export function loadTeamsPoolFromCsv(): TeamsPool {
     player3: header.indexOf(HEADERS.player3),
     player4: header.indexOf(HEADERS.player4),
     alias: header.indexOf(HEADERS.alias),
+    displayName: header.indexOf(HEADERS.displayName),
   };
 
   const pool: TeamsPool = { turfWar: [], splatZones: [] };
@@ -69,9 +71,10 @@ export function loadTeamsPoolFromCsv(): TeamsPool {
     // チーム名が空の行はスキップ
     if (rawName === '') continue;
 
+    const rawDisplayName = idx.displayName >= 0 ? (row[idx.displayName] ?? '').trim() : '';
     const team: Team = {
       id: rawName,
-      name: rawName,
+      name: rawDisplayName || rawName,
       alias: (row[idx.alias] ?? '').trim(),
       players: [
         (row[idx.player1] ?? '').trim(),
