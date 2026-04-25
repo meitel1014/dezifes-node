@@ -119,9 +119,9 @@ export function ResultsPanel({ mode }: Props) {
             <p>OCR 処理中…</p>
           ) : (
             <>
-              <p>両チームを表示状態にした上で、試合開始画面の PNG をドロップしてください。</p>
+              <p>両チームが表示状態の時、試合開始時自動的にマップ画面を読み取ります。</p>
               <p className="results-drop-hint">
-                {isDragging ? 'ここにドロップ' : 'または PNG をここにドロップ'}
+                {isDragging ? 'ここにドロップ' : '送信されなかった場合、 PNG をここにドロップ'}
               </p>
               {uploadError && <p className="results-drop-error">{uploadError}</p>}
             </>
@@ -175,7 +175,7 @@ export function ResultsPanel({ mode }: Props) {
         ) : (
           <ul>
             {recentMatches.map((m) => (
-              <HistoryItem key={m.id} match={m} teamsPool={teamsPool} aliases={aliases} />
+              <HistoryItem key={m.id} match={m} aliases={aliases} />
             ))}
           </ul>
         )}
@@ -431,18 +431,13 @@ function CandidateEditor({
 
 type HistoryItemProps = {
   match: Match;
-  teamsPool: TeamsPool;
   aliases: WeaponAliases | undefined;
 };
 
-function HistoryItem({ match, teamsPool, aliases }: HistoryItemProps) {
+function HistoryItem({ match, aliases }: HistoryItemProps) {
   const [open, setOpen] = useState(false);
-  const alphaName =
-    teamsPool[match.mode].find((t) => t.id === match.alpha.teamId)?.name ??
-    match.alpha.teamId;
-  const bravoName =
-    teamsPool[match.mode].find((t) => t.id === match.bravo.teamId)?.name ??
-    match.bravo.teamId;
+  const alphaName = match.alpha.teamId;
+  const bravoName = match.bravo.teamId;
 
   const handleDelete = () => {
     if (!confirm('この試合記録を削除しますか？')) return;

@@ -32,7 +32,7 @@ export function TeamSelectPanel({ mode }: Props) {
           <option value="">-- 選択してください --</option>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>
-              {stripHtml(t.name)}
+              {stripHtml(t.id)}
             </option>
           ))}
         </select>
@@ -47,7 +47,7 @@ export function TeamSelectPanel({ mode }: Props) {
           <option value="">-- 選択してください --</option>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>
-              {stripHtml(t.name)}
+              {stripHtml(t.id)}
             </option>
           ))}
         </select>

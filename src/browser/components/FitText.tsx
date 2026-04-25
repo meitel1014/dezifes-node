@@ -28,14 +28,20 @@ export function FitText({ html, align = 'left', style, ...rest }: Props) {
     const id = requestAnimationFrame(() => {
       const contentWidth = inner.scrollWidth;
       const availableWidth = container.clientWidth;
+      const contentHeight = inner.scrollHeight;
+      // 親要素に固定高さがある場合は縦方向の制約として使う
+      const availableHeight = container.parentElement?.clientHeight ?? 0;
 
       let newScale = 1;
       if (contentWidth > availableWidth && contentWidth > 0) {
-        newScale = availableWidth / contentWidth;
+        newScale = Math.min(newScale, availableWidth / contentWidth);
+      }
+      if (availableHeight > 0 && contentHeight > availableHeight) {
+        newScale = Math.min(newScale, availableHeight / contentHeight);
       }
       setScale(newScale);
       // コンテナの高さを視覚サイズに合わせる（transform はレイアウトに影響しないため）
-      container.style.height = `${inner.scrollHeight * newScale}px`;
+      container.style.height = `${contentHeight * newScale}px`;
     });
     return () => cancelAnimationFrame(id);
   }, [html]);
@@ -48,6 +54,7 @@ export function FitText({ html, align = 'left', style, ...rest }: Props) {
         ref={innerRef}
         style={{
           display: 'inline-block',
+          whiteSpace: 'nowrap',
           transform: `scale(${scale})`,
           transformOrigin: origin,
         }}
