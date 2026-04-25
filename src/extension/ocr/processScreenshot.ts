@@ -26,6 +26,12 @@ type Logger = {
   error: (message: string, ...args: unknown[]) => void;
 };
 
+export type StageResult = {
+  stageName: string;
+  score: number;
+  allScores: { stageName: string; score: number }[];
+};
+
 type ProcessInput = {
   screenshotPath: string;
   sourceFile: string;
@@ -33,7 +39,7 @@ type ProcessInput = {
   selection: Selection;
   teamsPool: TeamsPool;
   log: Logger;
-  stageCandidate?: { stageName: string; score: number; allScores: { stageName: string; score: number }[] } | null;
+  stageCandidate?: StageResult | null;
   inGameNames?: InGameNames | null;
 };
 
@@ -114,7 +120,7 @@ async function ocrSide(
   side: Side,
   log: Logger,
   inGameNames: InGameNames | null,
-): Promise<NonNullable<MatchCandidate>['alpha']['picks']> {
+): Promise<MatchCandidate['alpha']['picks']> {
   const positions: PickPosition[] = [0, 1, 2, 3];
 
   // 登録名 → ゲーム内名前（記載なければ登録名をそのまま使用）

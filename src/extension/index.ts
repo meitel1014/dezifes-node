@@ -12,6 +12,7 @@ import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
 import { loadStageTemplates, matchStage, getCachedStageNames } from './ocr/matchStage';
 import { processScreenshot } from './ocr/processScreenshot';
+import type { StageResult } from './ocr/processScreenshot';
 import type { Match, PickCandidate } from '../schemas';
 import type { Mode } from '../nodecg/messages';
 
@@ -19,7 +20,6 @@ import type { Mode } from '../nodecg/messages';
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
 type ConfirmedPicks = Match['alpha']['picks'];
 
-type StageResult = { stageName: string; score: number; allScores: { stageName: string; score: number }[] };
 // /stage で受信した最新ステージ候補をモード別に一時保持（Replicantは不要）
 const latestStageCandidate: Record<Mode, StageResult | null> = {
   turfWar: null,
