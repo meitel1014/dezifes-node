@@ -15,14 +15,14 @@ function TeamNames({ mode }: { mode: Mode }) {
 
   return (
     <div className="champ-team-names">
-      <div className="champ-team-name-wrapper" style={alphaFade}>
+      <div className="champ-team-name-wrapper team-alpha" style={alphaFade}>
         <FitText
           html={alpha.team?.name ?? ''}
           align="left"
           className="champ-team-name"
         />
       </div>
-      <div className="champ-team-name-wrapper" style={bravoFade}>
+      <div className="champ-team-name-wrapper team-bravo" style={bravoFade}>
         <FitText
           html={bravo.team?.name ?? ''}
           align="left"
