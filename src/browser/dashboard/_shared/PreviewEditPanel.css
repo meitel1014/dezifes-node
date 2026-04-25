@@ -14,11 +14,13 @@
 }
 
 .preview-alpha h3 {
+  font-size: 20px;
   color: var(--accent-alpha);
   border-bottom-color: color-mix(in srgb, var(--accent-alpha) 40%, transparent);
 }
 
 .preview-bravo h3 {
+  font-size: 20px;
   color: var(--accent-bravo);
   border-bottom-color: color-mix(in srgb, var(--accent-bravo) 40%, transparent);
 }
