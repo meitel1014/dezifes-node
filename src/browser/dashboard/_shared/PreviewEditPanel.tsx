@@ -104,12 +104,12 @@ export function PreviewEditPanel({ mode }: Props) {
 
     const teamFields: { field: EditTarget['field']; label: string }[] = [
       { field: 'alias', label: '二つ名' },
-      { field: 'name', label: 'チーム名' },
+      { field: 'name', label: 'チーム名 (左右用)' },
     ];
 
     return (
       <div className={`preview-column preview-${side}`}>
-        <h3>{side === 'alpha' ? 'アルファ' : 'ブラボー'}</h3>
+        <h3>{side === 'alpha' ? 'アルファ' : 'ブラボー'} | {team.id}</h3>
         <table className="preview-table">
           <tbody>
             {/* 二つ名・チーム名（編集可） */}
@@ -128,6 +128,8 @@ export function PreviewEditPanel({ mode }: Props) {
                         onKeyDown={handleKeyDown}
                         autoFocus
                       />
+                    ) : field === 'name' ? (
+                      <span className="field-value">{displayValue}</span>
                     ) : (
                       <Html value={displayValue} as="span" className="field-value" />
                     )}
