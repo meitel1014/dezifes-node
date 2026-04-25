@@ -1,4 +1,4 @@
-export { activeModeSchema } from './activeMode';
+export { activeModeSchema, MODE_VALUES } from './activeMode';
 export type { ActiveMode } from './activeMode';
 
 export { bundleConfigSchema } from './bundleConfig';

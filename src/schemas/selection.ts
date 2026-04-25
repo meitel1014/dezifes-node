@@ -4,7 +4,7 @@ import { z } from 'zod';
  * 各モードで アルファ / ブラボー に選択されたチーム ID（null は未選択）。
  * ID は TeamsPool 内で一意のキーとして扱う。
  */
-const slotSchema = z
+const selectionSlotSchema = z
   .object({
     alpha: z.string().nullable().default(null),
     bravo: z.string().nullable().default(null),
@@ -13,8 +13,8 @@ const slotSchema = z
 
 export const selectionSchema = z
   .object({
-    turfWar: slotSchema,
-    splatZones: slotSchema,
+    turfWar: selectionSlotSchema,
+    splatZones: selectionSlotSchema,
   })
   .default({
     turfWar: { alpha: null, bravo: null },

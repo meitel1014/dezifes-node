@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MODE_VALUES } from './activeMode';
 
 /**
  * 1 試合分のブキ編成ログ。確定操作で matches Replicant に追加される。
@@ -18,7 +19,7 @@ const sidePicksSchema = z.object({
 export const matchSchema = z.object({
   id: z.string(),
   timestamp: z.string(),
-  mode: z.enum(['turfWar', 'splatZones']),
+  mode: z.enum(MODE_VALUES),
   sourceFile: z.string(),
   alpha: sidePicksSchema,
   bravo: sidePicksSchema,
