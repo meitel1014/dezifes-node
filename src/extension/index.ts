@@ -271,8 +271,6 @@ export default (nodecg: NodeCG) => {
     } else {
       log.info(`[result] received '${result}' but no candidates in ${mode} queue`);
     }
-
-    res.status(200).end();
   });
 
   // ── Message ハンドラ ───────────────────────────────────
@@ -371,6 +369,11 @@ export default (nodecg: NodeCG) => {
     const cand = queue[candidateIndex];
     if (!cands || !cand) {
       if (ack && !ack.handled) ack(null);
+      return;
+    }
+
+    if (!cand.stageName) {
+      if (ack && !ack.handled) ack(new Error('ステージが未選択です'));
       return;
     }
 

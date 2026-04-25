@@ -1,8 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseCsv } from './csv';
-import type { TeamsPool } from '../schemas';
-import type { Team } from '../schemas';
+import type { TeamsPool, Team } from '../schemas';
 
 const CSV_PATH = path.resolve(process.cwd(), 'data/teams.csv');
 

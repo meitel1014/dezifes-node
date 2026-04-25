@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { serializeRow } from './csvWrite';
 import type { Match, Team, TeamsPool, WeaponAliases } from '../schemas';
+import type { Side } from '../nodecg/messages';
 
 const RECORDS_CSV_PATH = path.resolve(process.cwd(), 'data/records.csv');
 const TIMEOUT_MS = 10_000;
@@ -83,7 +84,7 @@ function buildSideWeapons(
 /** 1 試合分の統合行データを返す。 */
 export function buildRecordRow(
   match: Match,
-  wonSide: 'alpha' | 'bravo',
+  wonSide: Side,
   pool: TeamsPool | null,
   aliases: WeaponAliases | null,
 ): string[] {
@@ -111,7 +112,7 @@ export function buildRecordRow(
 /** `data/records.csv` に 1 行追記。ファイル不在ならヘッダ付きで新規作成する。 */
 export function appendRecordCsv(
   match: Match,
-  wonSide: 'alpha' | 'bravo',
+  wonSide: Side,
   pool: TeamsPool | null,
   aliases: WeaponAliases | null,
 ): void {
@@ -131,7 +132,7 @@ export function appendRecordCsv(
  */
 export async function appendRecordGoogleSheet(
   match: Match,
-  wonSide: 'alpha' | 'bravo',
+  wonSide: Side,
   pool: TeamsPool | null,
   aliases: WeaponAliases | null,
   endpointUrl: string,
