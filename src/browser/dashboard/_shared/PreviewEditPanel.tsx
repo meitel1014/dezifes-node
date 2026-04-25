@@ -1,16 +1,16 @@
 import './PreviewEditPanel.css';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { Html } from '../../components/Html';
 import { stripHtml } from '../../utils/stripHtml';
-import type { Mode } from '@/nodecg/messages';
+import type { Mode, Side } from '@/nodecg/messages';
 import type { Team } from '@/schemas';
 
 type Props = { mode: Mode };
 
 /** チーム情報（alias / name）の編集対象 */
 type EditTarget = {
-  side: 'alpha' | 'bravo';
+  side: Side;
   field: 'name' | 'alias';
   value: string;
 };
@@ -152,56 +152,58 @@ export function PreviewEditPanel({ mode }: Props) {
 
             {/* プレイヤー名（読み取り専用） + ゲーム内名前（編集可） */}
             {team.players.map((playerName, idx) => {
-              const currentInGame = (inGameNames ?? {})[playerName] ?? playerName;
+              const currentInGame = inGameNames?.[playerName] ?? playerName;
               const isEditingInGame = editInGame?.playerName === playerName;
               const isDifferent = currentInGame !== playerName;
 
-              return [
-                // 登録名行（読み取り専用）
-                <tr key={`player${idx}`}>
-                  <th>{PLAYER_LABELS[idx]}</th>
-                  <td>
-                    <span className="field-value field-value--readonly">
-                      {stripHtml(playerName) || '(空欄)'}
-                    </span>
-                  </td>
-                  <td className="action-cell" />
-                </tr>,
-                // ゲーム内名前行
-                <tr key={`ingame${idx}`} className="preview-ingame-row">
-                  <th className="preview-ingame-label">↳ゲーム内</th>
-                  <td>
-                    {isEditingInGame ? (
-                      <input
-                        className="edit-input"
-                        value={editInGame.value}
-                        onChange={(e) => setEditInGame({ ...editInGame, value: e.target.value })}
-                        onKeyDown={handleInGameKeyDown}
-                        autoFocus
-                      />
-                    ) : (
-                      <span className={`field-value${isDifferent ? ' field-value--ingame' : ''}`}>
-                        {currentInGame || '(空欄)'}
+              return (
+                <Fragment key={idx}>
+                  {/* 登録名行（読み取り専用） */}
+                  <tr>
+                    <th>{PLAYER_LABELS[idx]}</th>
+                    <td>
+                      <span className="field-value field-value--readonly">
+                        {stripHtml(playerName) || '(空欄)'}
                       </span>
-                    )}
-                  </td>
-                  <td className="action-cell">
-                    {isEditingInGame ? (
-                      <>
-                        <button className="btn-sm btn-save" onClick={saveInGameEdit}>保存</button>
-                        <button className="btn-sm btn-cancel" onClick={cancelInGameEdit}>取消</button>
-                      </>
-                    ) : (
-                      <button
-                        className="btn-sm btn-edit"
-                        onClick={() => startInGameEdit(playerName, currentInGame)}
-                      >
-                        編集
-                      </button>
-                    )}
-                  </td>
-                </tr>,
-              ];
+                    </td>
+                    <td className="action-cell" />
+                  </tr>
+                  {/* ゲーム内名前行 */}
+                  <tr className="preview-ingame-row">
+                    <th className="preview-ingame-label">↳ゲーム内</th>
+                    <td>
+                      {isEditingInGame ? (
+                        <input
+                          className="edit-input"
+                          value={editInGame.value}
+                          onChange={(e) => setEditInGame({ ...editInGame, value: e.target.value })}
+                          onKeyDown={handleInGameKeyDown}
+                          autoFocus
+                        />
+                      ) : (
+                        <span className={`field-value${isDifferent ? ' field-value--ingame' : ''}`}>
+                          {currentInGame || '(空欄)'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="action-cell">
+                      {isEditingInGame ? (
+                        <>
+                          <button className="btn-sm btn-save" onClick={saveInGameEdit}>保存</button>
+                          <button className="btn-sm btn-cancel" onClick={cancelInGameEdit}>取消</button>
+                        </>
+                      ) : (
+                        <button
+                          className="btn-sm btn-edit"
+                          onClick={() => startInGameEdit(playerName, currentInGame)}
+                        >
+                          編集
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                </Fragment>
+              );
             })}
           </tbody>
         </table>

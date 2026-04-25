@@ -240,7 +240,7 @@ function CandidateEditor({
     void nodecg.sendMessage('confirmMatchCandidate', { mode, candidateIndex });
     setShowAllWeapons({});
   };
-  const handleWonSideChange = (side: 'alpha' | 'bravo') => {
+  const handleWonSideChange = (side: Side) => {
     const newWonSide = cand.wonSide === side ? null : side;
     void nodecg.sendMessage('setMatchCandidateWonSide', { mode, candidateIndex, wonSide: newWonSide });
   };
@@ -332,7 +332,7 @@ function CandidateEditor({
                     </select>
                     {pick.selected.playerName && !cand.isManual ? (
                       <span className="player-ingame-name">
-                        {(inGameNames ?? {})[pick.selected.playerName] ?? pick.selected.playerName}
+                        {inGameNames?.[pick.selected.playerName] ?? pick.selected.playerName}
                       </span>
                     ) : null}
                   </td>
