@@ -46,8 +46,6 @@ async function generateSchemas() {
             $refStrategy: 'none',
           });
 
-          console.log(`[nodecg-schemas] Generated JSON Schema:`, JSON.stringify(jsonSchema, null, 2));
-
           // schemas/{name}.json に保存
           await fs.writeFile(
             path.join('schemas', `${name}.json`),
