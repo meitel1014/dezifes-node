@@ -165,7 +165,7 @@ async function ocrSide(
   }
 
   // フェーズ2: 重複なし自動選択（登録名ベースで行う）
-  const selectedNames = assignUnique(raw.map((r) => r.rankedNames.map((s) => s.name)));
+  const selectedNames = assignOptimal(raw.map((r) => r.rankedNames));
 
   // フェーズ3: 比較画像生成 — OCR 照合対象はゲーム内名前なので、ゲーム内名前でレンダリング
   const selectedInGameNames = selectedNames.map((name) => inGameNames?.[name] ?? name);
@@ -191,12 +191,38 @@ async function ocrSide(
   return [picks[0], picks[1], picks[2], picks[3]];
 }
 
-function assignUnique(rankedLists: string[][]): string[] {
-  const used = new Set<string>();
-  return rankedLists.map((ranked) => {
-    const pick = ranked.find((name) => name !== '' && !used.has(name)) ?? ranked[0] ?? '';
-    if (pick) used.add(pick);
-    return pick;
-  });
+function assignOptimal(rankedLists: { name: string; score: number }[][]): string[] {
+  // 全 (position, name, score) ペアをスコア昇順（MSE低い＝類似度高い）でソート
+  const allPairs: { position: number; name: string; score: number }[] = [];
+  for (let i = 0; i < rankedLists.length; i++) {
+    for (const { name, score } of rankedLists[i]) {
+      if (name !== '') allPairs.push({ position: i, name, score });
+    }
+  }
+  allPairs.sort((a, b) => a.score - b.score);
+
+  const usedPositions = new Set<number>();
+  const usedNames = new Set<string>();
+  const result: string[] = new Array(rankedLists.length).fill('');
+
+  for (const { position, name } of allPairs) {
+    if (!usedPositions.has(position) && !usedNames.has(name)) {
+      result[position] = name;
+      usedPositions.add(position);
+      usedNames.add(name);
+      if (usedPositions.size === rankedLists.length) break;
+    }
+  }
+
+  // フォールバック：未割り当てポジションに残りの候補を割り当て（フォント未ロード時など）
+  for (let i = 0; i < rankedLists.length; i++) {
+    if (result[i] === '') {
+      const fallback = rankedLists[i].find(({ name }) => name !== '' && !usedNames.has(name));
+      result[i] = fallback?.name ?? rankedLists[i][0]?.name ?? '';
+      if (result[i]) usedNames.add(result[i]);
+    }
+  }
+
+  return result;
 }
 
