@@ -1,5 +1,4 @@
 import { useFadeVisible } from '../../hooks/useFadeVisible';
-import { stripHtml } from '../../utils/stripHtml';
 import { useTeamData } from './useTeamData';
 import { ShadowFilters } from './ShadowFilters';
 import type { Mode, Side } from '@/nodecg/messages';
@@ -23,7 +22,7 @@ function TeamSlot({ mode, side }: { mode: Mode; side: Side }) {
     <div className={`under-slot under-${side}`} style={fadeStyle}>
       {team && (
         <>
-          <div className="under-team-name">{stripHtml(team.name)}</div>
+          <div className="under-team-name">{team.id}</div>
           <div className="under-players">
             {team.players.join('\u3000')}
           </div>
