@@ -63,6 +63,7 @@
 .champ-player {
   font-size: 28px;
   line-height: 1.2;
+  letter-spacing: -0.05em;
 }
 
 .champ-bravo-players .champ-player {
