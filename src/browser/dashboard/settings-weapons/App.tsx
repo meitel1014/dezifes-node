@@ -1,27 +1,11 @@
-import { useState } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
-
-type Status = 'idle' | 'loading' | 'done' | 'error';
+import { statusLabel, useReloadButton } from '../_shared/useReloadButton';
 
 export function WeaponsSettingsPanel() {
   const [aliases] = useReplicant('weaponAliases');
-  const [reloadStatus, setReloadStatus] = useState<Status>('idle');
+  const reload = useReloadButton('reloadWeaponAliases');
 
   const total = Object.keys(aliases ?? {}).length;
-
-  const handleReload = () => {
-    setReloadStatus('loading');
-    void nodecg.sendMessage('reloadWeaponAliases').then(
-      () => {
-        setReloadStatus('done');
-        setTimeout(() => setReloadStatus('idle'), 2000);
-      },
-      () => {
-        setReloadStatus('error');
-        setTimeout(() => setReloadStatus('idle'), 3000);
-      }
-    );
-  };
 
   return (
     <div className="csv-reload-panel">
@@ -31,17 +15,11 @@ export function WeaponsSettingsPanel() {
         現在の登録数: <strong>{total}</strong> 件
       </p>
       <button
-        onClick={handleReload}
-        disabled={reloadStatus === 'loading'}
+        onClick={reload.handle}
+        disabled={reload.status === 'loading'}
         className="btn btn-reload"
       >
-        {reloadStatus === 'loading'
-          ? '読み込み中…'
-          : reloadStatus === 'done'
-            ? '完了'
-            : reloadStatus === 'error'
-              ? '失敗'
-              : '対応表CSVを再読込'}
+        {statusLabel(reload.status, '対応表CSVを再読込')}
       </button>
     </div>
   );

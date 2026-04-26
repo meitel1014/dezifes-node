@@ -1,6 +1,4 @@
 import { z } from 'zod';
 
-const inGameNamesSchema = z.record(z.string()).default({});
-
-export { inGameNamesSchema };
+export const inGameNamesSchema = z.record(z.string(), z.string()).default({});
 export type InGameNames = z.infer<typeof inGameNamesSchema>;

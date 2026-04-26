@@ -12,14 +12,14 @@ import { pushToQueue } from './candidateQueue';
 import { loadWeaponTemplates } from './ocr/matchWeapon';
 import { loadStageTemplates, matchStage, getCachedStageNames } from './ocr/matchStage';
 import { processScreenshot } from './ocr/processScreenshot';
+import type { StageResult } from './ocr/processScreenshot';
 import type { Match, PickCandidate } from '../schemas';
-import type { Mode } from '../nodecg/messages';
+import type { Mode, Side } from '../nodecg/messages';
 
 
 type PicksTuple = [PickCandidate, PickCandidate, PickCandidate, PickCandidate];
 type ConfirmedPicks = Match['alpha']['picks'];
 
-type StageResult = { stageName: string; score: number; allScores: { stageName: string; score: number }[] };
 // /stage で受信した最新ステージ候補をモード別に一時保持（Replicantは不要）
 const latestStageCandidate: Record<Mode, StageResult | null> = {
   turfWar: null,
@@ -271,8 +271,6 @@ export default (nodecg: NodeCG) => {
     } else {
       log.info(`[result] received '${result}' but no candidates in ${mode} queue`);
     }
-
-    res.status(200).end();
   });
 
   // ── Message ハンドラ ───────────────────────────────────
@@ -371,6 +369,11 @@ export default (nodecg: NodeCG) => {
     const cand = queue[candidateIndex];
     if (!cands || !cand) {
       if (ack && !ack.handled) ack(null);
+      return;
+    }
+
+    if (!cand.stageName) {
+      if (ack && !ack.handled) ack(new Error('ステージが未選択です'));
       return;
     }
 
@@ -513,7 +516,7 @@ export default (nodecg: NodeCG) => {
       isManual: true,
       alpha: { teamId: alphaId ?? '', picks: teamPicks(alphaId) },
       bravo: { teamId: bravoId ?? '', picks: teamPicks(bravoId) },
-      wonSide: null as 'alpha' | 'bravo' | null,
+      wonSide: null as Side | null,
       stageName: null as string | null,
       stageScore: null as number | null,
       stageScores: [] as { stageName: string; score: number }[],

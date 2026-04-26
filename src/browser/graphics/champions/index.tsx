@@ -5,7 +5,7 @@ import { useReplicant } from '@/browser/hooks/useReplicant';
 import { useFadeVisible } from '@/browser/hooks/useFadeVisible';
 import { FitText } from '@/browser/components/FitText';
 import { useTeamData } from '../_shared/useTeamData';
-import type { Mode } from '@/nodecg/messages';
+import type { Mode, Side } from '@/nodecg/messages';
 
 function TeamNames({ mode }: { mode: Mode }) {
   const alpha = useTeamData(mode, 'alpha');
@@ -33,25 +33,13 @@ function TeamNames({ mode }: { mode: Mode }) {
   );
 }
 
-function AlphaPlayers({ mode }: { mode: Mode }) {
-  const { team, visible } = useTeamData(mode, 'alpha');
+function PlayersColumn({ mode, side }: { mode: Mode; side: Side }) {
+  const { team, visible } = useTeamData(mode, side);
   const fadeStyle = useFadeVisible(visible);
+  const className = side === 'alpha' ? 'champ-alpha-players' : 'champ-bravo-players';
 
   return (
-    <div className="champ-alpha-players" style={fadeStyle}>
-      {team?.players.map((p, i) => (
-        <div key={i} className="champ-player">{p}</div>
-      ))}
-    </div>
-  );
-}
-
-function BravoPlayers({ mode }: { mode: Mode }) {
-  const { team, visible } = useTeamData(mode, 'bravo');
-  const fadeStyle = useFadeVisible(visible);
-
-  return (
-    <div className="champ-bravo-players" style={fadeStyle}>
+    <div className={className} style={fadeStyle}>
       {team?.players.map((p, i) => (
         <div key={i} className="champ-player">{p}</div>
       ))}
@@ -63,8 +51,8 @@ function ChampionsGraphic({ mode }: { mode: Mode }) {
   return (
     <div className="champ-container">
       <TeamNames mode={mode} />
-      <AlphaPlayers mode={mode} />
-      <BravoPlayers mode={mode} />
+      <PlayersColumn mode={mode} side="alpha" />
+      <PlayersColumn mode={mode} side="bravo" />
     </div>
   );
 }

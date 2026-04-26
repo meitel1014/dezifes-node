@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+import type { Mode } from '../../nodecg/messages';
+import { yieldToEventLoop } from './utils';
 
 const STAGES_BASE_DIR = path.resolve(process.cwd(), 'data/stages');
 // 1920×1080 の上 250px を除外した判定領域（原寸）
 const CROP_TOP_1080 = 250;
-
-const yieldToEventLoop = (): Promise<void> => new Promise((r) => setImmediate(r));
 
 type StageTemplate = {
   stageName: string;
@@ -22,7 +22,6 @@ const templateCache: { turfWar: StageTemplate[] | null; splatZones: StageTemplat
 };
 
 type WarnLogger = (message: string, ...args: unknown[]) => void;
-type Mode = 'turfWar' | 'splatZones';
 
 async function extractRgb(
   imgPath: string,

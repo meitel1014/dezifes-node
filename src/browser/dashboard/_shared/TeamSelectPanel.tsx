@@ -1,7 +1,7 @@
 import './TeamSelectPanel.css';
 import { useReplicant } from '../../hooks/useReplicant';
 import { stripHtml } from '../../utils/stripHtml';
-import type { Mode } from '@/nodecg/messages';
+import type { Mode, Side } from '@/nodecg/messages';
 
 type Props = { mode: Mode };
 
@@ -14,7 +14,7 @@ export function TeamSelectPanel({ mode }: Props) {
   const teams = teamsPool[mode];
   const slot = selection[mode];
 
-  const handleChange = (side: 'alpha' | 'bravo', teamId: string) => {
+  const handleChange = (side: Side, teamId: string) => {
     setSelection({
       ...selection,
       [mode]: { ...slot, [side]: teamId || null },

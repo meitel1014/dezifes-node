@@ -1,6 +1,6 @@
-import type { Team } from '../schemas';
+import type { ActiveMode, Team } from '../schemas';
 
-export type Mode = 'turfWar' | 'splatZones';
+export type Mode = ActiveMode;
 export type Side = 'alpha' | 'bravo';
 export type PickPosition = 0 | 1 | 2 | 3;
 
@@ -40,7 +40,7 @@ export type MessageMap = {
 
   /** 判定結果候補の勝利サイドを設定（null で解除） */
   setMatchCandidateWonSide: {
-    data: { mode: Mode; candidateIndex: number; wonSide: 'alpha' | 'bravo' | null };
+    data: { mode: Mode; candidateIndex: number; wonSide: Side | null };
   };
 
   /** data/weapon_aliases.csv を再読込して weaponAliases Replicant に反映 */
