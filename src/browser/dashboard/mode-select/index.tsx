@@ -16,7 +16,6 @@ function App() {
 
   return (
     <div className="mode-select-panel">
-      <div className="mode-select-label">ルール</div>
       <div className="mode-select-buttons">
         <button
           className={`mode-select-btn mode-select-btn--turf-war${activeMode === 'turfWar' ? ' active' : ''}`}

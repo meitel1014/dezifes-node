@@ -9,13 +9,6 @@
   gap: 8px;
 }
 
-.mode-select-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-}
-
 .mode-select-buttons {
   display: flex;
   gap: 8px;

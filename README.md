@@ -74,22 +74,16 @@ dataフォルダ内に、Discord上のリンクから落としてきたデータ
 npx nodecg start
 ```
 
-起動後、ブラウザで以下にアクセスします。
-
-| URL | 用途 |
-|---|---|
-| http://localhost:9090 | ダッシュボード（運営操作画面） |
-| http://localhost:9090/bundles/dezifes-nodecg/graphics/turf-war-under.html | ナワバリ Under（配信画面下部） |
-| http://localhost:9090/bundles/dezifes-nodecg/graphics/turf-war-side.html | ナワバリ Side（会場左右分割） |
-| http://localhost:9090/bundles/dezifes-nodecg/graphics/splat-zones-under.html | エリア Under（配信画面下部） |
-| http://localhost:9090/bundles/dezifes-nodecg/graphics/splat-zones-side.html | エリア Side（会場左右分割） |
+起動後、ブラウザで http://localhost:9090 にアクセスします。
 
 ### 8. OBS への取り込み
 
-1. OBS で「ソース」→「＋」→「ブラウザ」を追加
-2. URL に上記の Graphics URL を入力
-3. 幅 `1920`、高さ `1080` に設定
-4. 「カスタム CSS」は空にする（デフォルトの body 背景色指定を消すため）
+1. 開いたサイトで右上の「GRAPHICS」をクリック
+2. 使用するグラフィックの「COPY URL」をクリック
+3. OBS で「ソース」→「＋」→「ブラウザ」を追加
+4. URL に上記の Graphics URL を入力
+5. 幅 `1920`、高さ `1080` に設定
+6. 「カスタム CSS」は空にする（デフォルトの body 背景色指定を消すため）
 
 ## 運営操作ガイド
 
@@ -97,17 +91,9 @@ npx nodecg start
 
 ダッシュボードには 3 つのタブ（Workspace）があります。
 
-- **ナワバリ** — ナワバリトーナメント用の操作パネル
-- **エリア** — エリアトーナメント用の操作パネル
+- **BATTLE** — 選手情報の操作パネル
+- **判定結果** — 編成・勝利情報の確認・手動入力画面
 - **設定** — CSV 再読込
-
-各トーナメントのタブには以下のパネルがあります。
-
-| パネル | 操作内容 |
-|---|---|
-| チーム選択 | アルファ / ブラボーのチームをプルダウンで選択 |
-| 表示操作 | チーム情報の表示 / 非表示切り替え、リセット |
-| プレビュー編集 | 選択チームの情報を確認・編集 |
 
 ### 基本的な操作の流れ
 
