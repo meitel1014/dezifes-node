@@ -108,6 +108,11 @@ export function ResultsPanel({ mode }: Props) {
     onDrop: (e: React.DragEvent) => { void handleDrop(e); },
   };
 
+  const alphaId = selection[mode].alpha;
+  const bravoId = selection[mode].bravo;
+  const waitingAlphaTeam = teamsPool[mode].find((t) => t.id === alphaId) ?? null;
+  const waitingBravoTeam = teamsPool[mode].find((t) => t.id === bravoId) ?? null;
+
   return (
     <div className="results-panel">
       {queue.length === 0 ? (
@@ -119,6 +124,14 @@ export function ResultsPanel({ mode }: Props) {
             <p>OCR 処理中…</p>
           ) : (
             <>
+              <div className="results-grid results-waiting-teams">
+                <div className="results-column results-alpha">
+                  <h3><span>アルファ | <Html value={waitingAlphaTeam?.id ?? '(未選択)'} /></span></h3>
+                </div>
+                <div className="results-column results-bravo">
+                  <h3><span>ブラボー | <Html value={waitingBravoTeam?.id ?? '(未選択)'} /></span></h3>
+                </div>
+              </div>
               <p>両チームが表示状態の時、試合開始時自動的にマップ画面を読み取ります。</p>
               <p className="results-drop-hint">
                 {isDragging ? 'ここにドロップ' : '送信されなかった場合、 PNG をここにドロップ'}
