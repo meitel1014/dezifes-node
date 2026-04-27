@@ -23,6 +23,13 @@
   border-radius: var(--radius);
 }
 
+.flash-stage {
+  animation: flash-weapons-once 2s ease-in-out 2;
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin: -4px -6px;
+}
+
 .flash-winner-alpha {
   --flash-bg: color-mix(in srgb, var(--accent-alpha) 25%, transparent);
   animation: flash-winner-blink 0.5s ease-in-out 7;
@@ -137,6 +144,22 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.results-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+}
+
+.results-stage-icon {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
 .results-source {
