@@ -4,6 +4,41 @@
   gap: 16px;
 }
 
+/* ── フラッシュアニメーション ── */
+
+@keyframes flash-weapons-once {
+  0%   { background-color: transparent; box-shadow: none; }
+  50%  { background-color: rgba(255, 220, 60, 0.15); box-shadow: 0 0 0 2px rgba(255, 220, 60, 0.5); }
+  100% { background-color: transparent; box-shadow: none; }
+}
+
+@keyframes flash-winner-blink {
+  0%   { background-color: transparent; }
+  50%  { background-color: var(--flash-bg); }
+  100% { background-color: transparent; }
+}
+
+.flash-weapons {
+  animation: flash-weapons-once 2s ease-in-out 2;
+  border-radius: var(--radius);
+}
+
+.flash-winner-alpha {
+  --flash-bg: color-mix(in srgb, var(--accent-alpha) 25%, transparent);
+  animation: flash-winner-blink 0.5s ease-in-out 7;
+  border-radius: 6px;
+  padding: 6px;
+  margin: -6px;
+}
+
+.flash-winner-bravo {
+  --flash-bg: color-mix(in srgb, var(--accent-bravo) 25%, transparent);
+  animation: flash-winner-blink 0.5s ease-in-out 7;
+  border-radius: 6px;
+  padding: 6px;
+  margin: -6px;
+}
+
 .results-empty,
 .results-queue-item,
 .results-drop-compact,

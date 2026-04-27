@@ -1,5 +1,5 @@
 import './ResultsPanel.css';
-import { Fragment, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { stripHtml } from '../../utils/stripHtml';
 import { Html } from '../../components/Html';
@@ -233,6 +233,23 @@ function CandidateEditor({
   const alphaTeam = teamsPool[mode].find((t) => t.id === cand.alpha.teamId) ?? null;
   const bravoTeam = teamsPool[mode].find((t) => t.id === cand.bravo.teamId) ?? null;
 
+  // ブキ編成フラッシュ: OCR由来の候補がマウントされた瞬間に1回点灯
+  const [weaponsFlash, setWeaponsFlash] = useState(!cand.isManual);
+
+  // 勝利サイドフラッシュ: wonSideが null→値 に変化したとき5回点滅
+  const [wonSideFlash, setWonSideFlash] = useState<Side | null>(null);
+  const prevWonSideRef = useRef<Side | null | undefined>(undefined);
+  useEffect(() => {
+    if (
+      prevWonSideRef.current !== undefined &&
+      cand.wonSide !== prevWonSideRef.current &&
+      cand.wonSide !== null
+    ) {
+      setWonSideFlash(cand.wonSide);
+    }
+    prevWonSideRef.current = cand.wonSide;
+  }, [cand.wonSide]);
+
   const handleConfirm = () => {
     if (!cand.stageName) {
       alert('ステージを選択してください');
@@ -289,7 +306,10 @@ function CandidateEditor({
     const playerOptions = team?.players ?? (['', '', '', ''] as const);
 
     return (
-      <div className={`results-column results-${side}`}>
+      <div
+        className={`results-column results-${side}${wonSideFlash === side ? ` flash-winner-${side}` : ''}`}
+        onAnimationEnd={(e) => { if (e.currentTarget === e.target) setWonSideFlash(null); }}
+      >
         <h3>
           <span>
             {side === 'alpha' ? 'アルファ' : 'ブラボー'} |{' '}
@@ -425,7 +445,10 @@ function CandidateEditor({
           ) : null;
         })()}
       </div>
-      <div className="results-grid">
+      <div
+        className={`results-grid${weaponsFlash ? ' flash-weapons' : ''}`}
+        onAnimationEnd={(e) => { if (e.currentTarget === e.target) setWeaponsFlash(false); }}
+      >
         {renderSide('alpha')}
         {renderSide('bravo')}
       </div>
