@@ -41,8 +41,7 @@
         "title": "プレビュー編集",
         "file": "turf-war-preview.html",
         "workspace": "Battle",
-        "width": 8,
-        "height": 500
+        "width": 8
       },
       {
         "name": "result",

@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  min-height: 476px; /* body padding 12px × 2 を除いた値で合計 500px */
 }
 
 .preview-column h3 {
