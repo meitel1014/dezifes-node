@@ -107,6 +107,17 @@ export default (nodecg: NodeCG) => {
     }
   });
 
+  // ステージアイコンを /stage-icons/{stageName}.png で配信
+  nodecg.mount('/stage-icons', (req, res) => {
+    const filename = path.basename(decodeURIComponent(req.path));
+    const filePath = path.join(process.cwd(), 'data/stages/icon', filename);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).end();
+    }
+  });
+
   // OBS・外部ツールから base64 PNG を受け取り OCR を実行するエンドポイント
   // POST /weapons  (body: <raw base64 PNG>, Content-Type: text/plain)
   nodecg.mount('/weapons', (req, res) => {
@@ -163,11 +174,19 @@ export default (nodecg: NodeCG) => {
           log.warn(`[weapons] OCR skipped: ${filename} — アルファ/ブラボー チームが選択されていません`);
           return;
         }
+        // /weapons → /stage 順の場合、OCR完了時点で latestStageCandidate が埋まっていれば補完
+        const stage = latestStageCandidate[mode];
+        const resolved = (stage && cand.stageName === null) ? {
+          ...cand,
+          stageName: stage.stageName,
+          stageScore: stage.score,
+          stageScores: stage.allScores,
+        } : cand;
         const cur = matchCandidatesRep.value ?? { turfWar: [], splatZones: [] };
         // 手動入力候補を OCR 結果で置き換える
         const withoutManual = { ...cur, [mode]: cur[mode].filter((c) => !c.isManual) };
-        matchCandidatesRep.value = pushToQueue(withoutManual, mode, cand);
-        log.info(`[weapons] OCR done: ${filename} (mode=${mode})`);
+        matchCandidatesRep.value = pushToQueue(withoutManual, mode, resolved);
+        log.info(`[weapons] OCR done: ${filename} (mode=${mode})${resolved.stageName ? ` stage="${resolved.stageName}"` : ''}`);
       }).catch((e) => log.error(`[weapons] OCR 失敗: ${filename}`, e));
     });
 
@@ -218,6 +237,25 @@ export default (nodecg: NodeCG) => {
           if (ranked.length > 0) {
             latestStageCandidate[mode] = { stageName: ranked[0].stageName, score: ranked[0].score, allScores: ranked };
             log.info(`[stage] best match: "${ranked[0].stageName}" score=${(ranked[0].score * 100).toFixed(1)}% (mode=${mode})`);
+
+            // /weapons → /stage 順の場合、OCR が先に完了してキューに積まれていれば後付けで反映
+            const cands = matchCandidatesRep.value;
+            if (cands) {
+              const queue = cands[mode];
+              const lastIdx = queue.length - 1;
+              if (lastIdx >= 0 && !queue[lastIdx].isManual && queue[lastIdx].stageName === null) {
+                const updated = {
+                  ...queue[lastIdx],
+                  stageName: ranked[0].stageName,
+                  stageScore: ranked[0].score,
+                  stageScores: ranked,
+                };
+                matchCandidatesRep.value = {
+                  ...cands,
+                  [mode]: [...queue.slice(0, lastIdx), updated],
+                };
+              }
+            }
           } else {
             latestStageCandidate[mode] = null;
             log.warn(`[stage] ステージテンプレートが見つかりません (mode=${mode})`);
@@ -404,6 +442,8 @@ export default (nodecg: NodeCG) => {
       ...cands,
       [mode]: queue.filter((_, i) => i !== candidateIndex),
     };
+    // 確定した候補のステージ情報が次の候補に引き継がれないようクリア
+    latestStageCandidate[mode] = null;
 
     try {
       appendRecordCsv(match, wonSide, teamsPoolRep.value ?? null, weaponAliasesRep.value ?? null);
@@ -447,6 +487,8 @@ export default (nodecg: NodeCG) => {
       ...cands,
       [mode]: queue.filter((_, i) => i !== candidateIndex),
     };
+    // 破棄した候補のステージ情報が次の候補に引き継がれないようクリア
+    latestStageCandidate[mode] = null;
     if (ack && !ack.handled) ack(null);
   });
 

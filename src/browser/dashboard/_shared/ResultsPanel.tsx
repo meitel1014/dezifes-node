@@ -1,5 +1,5 @@
 import './ResultsPanel.css';
-import { Fragment, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useReplicant } from '../../hooks/useReplicant';
 import { stripHtml } from '../../utils/stripHtml';
 import { Html } from '../../components/Html';
@@ -233,6 +233,40 @@ function CandidateEditor({
   const alphaTeam = teamsPool[mode].find((t) => t.id === cand.alpha.teamId) ?? null;
   const bravoTeam = teamsPool[mode].find((t) => t.id === cand.bravo.teamId) ?? null;
 
+  // ブキ編成フラッシュ: OCR由来の候補がマウントされた瞬間に1回点灯
+  const [weaponsFlash, setWeaponsFlash] = useState(!cand.isManual);
+
+  // 勝利サイドフラッシュ: wonSideが null→値 に変化したとき5回点滅（手動操作時は除外）
+  const [wonSideFlash, setWonSideFlash] = useState<Side | null>(null);
+  const prevWonSideRef = useRef<Side | null | undefined>(undefined);
+  const manualWonSideRef = useRef(false);
+  useEffect(() => {
+    if (manualWonSideRef.current) {
+      manualWonSideRef.current = false;
+    } else if (
+      prevWonSideRef.current !== undefined &&
+      cand.wonSide !== prevWonSideRef.current &&
+      cand.wonSide !== null
+    ) {
+      setWonSideFlash(cand.wonSide);
+    }
+    prevWonSideRef.current = cand.wonSide;
+  }, [cand.wonSide]);
+
+  // ステージフラッシュ: stageName が null→値 に変化したとき（/stage 後付け反映）
+  const [stageFlash, setStageFlash] = useState(false);
+  const prevStageNameRef = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (
+      prevStageNameRef.current !== undefined &&
+      cand.stageName !== prevStageNameRef.current &&
+      cand.stageName !== null
+    ) {
+      setStageFlash(true);
+    }
+    prevStageNameRef.current = cand.stageName;
+  }, [cand.stageName]);
+
   const handleConfirm = () => {
     if (!cand.stageName) {
       alert('ステージを選択してください');
@@ -254,6 +288,7 @@ function CandidateEditor({
     setShowAllWeapons({});
   };
   const handleWonSideChange = (side: Side) => {
+    manualWonSideRef.current = true;
     const newWonSide = cand.wonSide === side ? null : side;
     void nodecg.sendMessage('setMatchCandidateWonSide', { mode, candidateIndex, wonSide: newWonSide });
   };
@@ -289,7 +324,10 @@ function CandidateEditor({
     const playerOptions = team?.players ?? (['', '', '', ''] as const);
 
     return (
-      <div className={`results-column results-${side}`}>
+      <div
+        className={`results-column results-${side}${wonSideFlash === side ? ` flash-winner-${side}` : ''}`}
+        onAnimationEnd={(e) => { if (e.currentTarget === e.target) setWonSideFlash(null); }}
+      >
         <h3>
           <span>
             {side === 'alpha' ? 'アルファ' : 'ブラボー'} |{' '}
@@ -399,33 +437,42 @@ function CandidateEditor({
 
   return (
     <div className="results-editor">
-      <div className="results-source">
-        {cand.isManual
-          ? '手動入力'
-          : <>元: <code>{cand.sourceFile}</code>（{new Date(cand.createdAt).toLocaleTimeString()}）</>
-        }
-      </div>
-      <div className="results-stage">
-        <label className="results-stage-label">ステージ</label>
-        <select
-          className="results-stage-select"
-          value={cand.stageName ?? ''}
-          onChange={(e) => handleStageChange(e.target.value)}
+      <div className="results-header">
+        <div
+          className={`results-stage${stageFlash ? ' flash-stage' : ''}`}
+          onAnimationEnd={() => setStageFlash(false)}
         >
-          <option value="">(未設定)</option>
-          {(stageNames?.[mode] ?? []).map((name) => (
-            <option key={name} value={name}>{name}</option>
-          ))}
-        </select>
-        {(() => {
-          const score = cand.stageScores.find((s) => s.stageName === cand.stageName)?.score
-            ?? (cand.stageName ? cand.stageScore : null);
-          return score !== null && score !== undefined ? (
-            <span className="results-stage-score">{(score * 100).toFixed(1)}%</span>
-          ) : null;
-        })()}
+          <label className="results-stage-label">ステージ</label>
+          <select
+            className="results-stage-select"
+            value={cand.stageName ?? ''}
+            onChange={(e) => handleStageChange(e.target.value)}
+          >
+            <option value="">(未設定)</option>
+            {(stageNames?.[mode] ?? []).map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+          {(() => {
+            const score = cand.stageScores.find((s) => s.stageName === cand.stageName)?.score
+              ?? (cand.stageName ? cand.stageScore : null);
+            return score !== null && score !== undefined ? (
+              <span className="results-stage-score">{(score * 100).toFixed(1)}%</span>
+            ) : null;
+          })()}
+          {cand.stageName && (
+            <img
+              className="results-stage-icon"
+              src={`/stage-icons/${encodeURIComponent(cand.stageName)}.png`}
+              alt={cand.stageName}
+            />
+          )}
+        </div>
       </div>
-      <div className="results-grid">
+      <div
+        className={`results-grid${weaponsFlash ? ' flash-weapons' : ''}`}
+        onAnimationEnd={(e) => { if (e.currentTarget === e.target) setWeaponsFlash(false); }}
+      >
         {renderSide('alpha')}
         {renderSide('bravo')}
       </div>
@@ -448,6 +495,12 @@ function CandidateEditor({
           />
         </details>
       )}
+      <div className="results-source">
+        {cand.isManual
+          ? '手動入力'
+          : <>元: <code>{cand.sourceFile}</code>（{new Date(cand.createdAt).toLocaleTimeString()}）</>
+        }
+      </div>
     </div>
   );
 }
